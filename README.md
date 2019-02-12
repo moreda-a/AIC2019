@@ -1,3 +1,2 @@
 # AIC2019
-Sharif AI Challenge
-Team DOS AI challenge repository
+Team DOS Sharif AI Challenge repository
