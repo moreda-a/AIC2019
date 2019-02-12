@@ -30,7 +30,7 @@ public class Util extends Constants {
 	}
 
 	public static void turn(World world) {
-		Constants.setTurnConstants(world);
+		//Constants.setTurnConstants(world);
 	}
 
 	public static void moveTurn(World world) {
