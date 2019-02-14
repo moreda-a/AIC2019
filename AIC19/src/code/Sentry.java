@@ -1,5 +1,24 @@
 package code;
 
-public class Sentry {
+import client.model.Hero;
+
+public class Sentry extends Ahero {
+
+	public Sentry(Hero h) {
+		super(h);
+		// TODO Auto-generated constructor stub
+	}
+
+	@Override
+	public void doTurn() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void moveTurn() {
+		// TODO Auto-generated method stub
+
+	}
 
 }

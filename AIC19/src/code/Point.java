@@ -11,6 +11,7 @@ public class Point {
 	public boolean inObjectiveZone;
 
 	public boolean isInVision;
+	public boolean full = false;
 
 //	public int lastTimeChange;
 //	public int robot;
@@ -59,6 +60,17 @@ public class Point {
 		this.inMyRespawnZone = cell.isInMyRespawnZone();
 		this.inOppRespawnZone = cell.isInOppRespawnZone();
 		this.inObjectiveZone = cell.isInObjectiveZone();
+	}
+
+	public void setFull(boolean full) {
+		this.full = full;
+	}
+
+	// return null if you can't go there
+	public Point dir1To(Direction1 dir) {
+		if (Util.isInMap(x + Util.dx1(dir), y + Util.dy1(dir)))
+			return Util.p[x + Util.dx1(dir)][y + Util.dy1(dir)];
+		return null;
 	}
 
 	public int dxTo(Point po) {

@@ -1,5 +1,23 @@
 package code;
 
-public class Healer extends Warrior {
+import client.model.*;
+
+public class Healer extends Ahero {
+
+	public Healer(Hero h) {
+		super(h);
+	}
+
+	@Override
+	public void doTurn() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void moveTurn() {
+		// TODO Auto-generated method stub
+
+	}
 
 }

@@ -4,14 +4,17 @@ import client.model.*;
 
 public class Pick extends Util {
 
-	public static void doTurn(World world) {
-		System.out.println("pick" + world.getCurrentTurn());
+	public static void doTurn() {
 		// world.pickHero(HeroName.values()[world.getCurrentTurn()]);
 		if (turn == 0)
-			world.pickHero(HeroName.BLASTER);
+			nextHero = HeroName.BLASTER;
 		else
-			world.pickHero(HeroName.HEALER);
+			nextHero = HeroName.HEALER;
+		addHero();
+	}
 
+	private static void addHero() {
+		world.pickHero(nextHero);
 	}
 
 }

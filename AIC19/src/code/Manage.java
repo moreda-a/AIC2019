@@ -7,19 +7,21 @@ import client.model.*;
 public class Manage extends Util {
 	public static void preProcess(World world) {
 		System.out.println(world.getFirstMoveTimeout());
-		// Util.init(world);// util
+		Util.init(world);// util
 	}
 
 	public static void pickTurn(World world) {
-		Pick.doTurn(world);
+		update(world);
+		Pick.doTurn();
 	}
 
 	public static void moveTurn(World world) {
-		// Util.turn(world);
-		Movement.moveTurn(world);
+		update(world);
+		Movement.doTurn(world);
 	}
 
 	public static void actionTurn(World world) {
+		update(world);
 //		Util.turn(world);
 //		Hero[] heroes = world.getMyHeroes();
 //		Random random = new Random();
