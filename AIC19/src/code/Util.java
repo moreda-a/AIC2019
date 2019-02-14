@@ -1,11 +1,11 @@
 package code;
 
-import java.util.Random;
-
 import client.model.*;
 
 public class Util extends Constants {
 	// static class
+	public static int turn;
+	public static int phase;
 
 	public static int size;
 	public static Map mapp;
@@ -29,18 +29,8 @@ public class Util extends Constants {
 
 	}
 
-	public static void turn(World world) {
-		//Constants.setTurnConstants(world);
-	}
-
-	public static void moveTurn(World world) {
-		System.out.println("move started");
-		Random random = new Random();
-		Hero[] heroes = world.getMyHeroes();
-
-		for (Hero hero : heroes) {
-			world.moveHero(hero, Direction.values()[random.nextInt(4)]);
-		}
+	public static void update(World world) {
+		// Constants.setTurnConstants(world);
 	}
 
 	public boolean isInMap(int x, int y) {

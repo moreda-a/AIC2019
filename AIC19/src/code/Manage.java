@@ -6,16 +6,17 @@ import client.model.*;
 
 public class Manage extends Util {
 	public static void preProcess(World world) {
-		//Util.init(world);// util
+		System.out.println(world.getFirstMoveTimeout());
+		// Util.init(world);// util
 	}
 
 	public static void pickTurn(World world) {
-		//Pick.turn(world);
+		Pick.doTurn(world);
 	}
 
 	public static void moveTurn(World world) {
-		//Util.turn(world);
-		//Movement.moveTurn(world);
+		// Util.turn(world);
+		Movement.moveTurn(world);
 	}
 
 	public static void actionTurn(World world) {
