@@ -22,6 +22,8 @@ public class Util extends Constants {
 
 	public static HeroName nextHero;
 
+	public static long startTime;
+
 	public static ArrayList<Ahero> mHeros = new ArrayList<Ahero>();
 	public static ArrayList<Point> fulls = new ArrayList<Point>();
 
@@ -56,14 +58,15 @@ public class Util extends Constants {
 		setTurnConstants(world);
 		turn = world.getCurrentTurn();
 		phase = world.getMovePhaseNum();
-
-		for (Point po : fulls) {
-			po.setFull(false);
-		}
-		fulls = new ArrayList<Point>();
-		for (Hero h : world.getMyHeroes()) {
-			fulls.add(p[h.getCurrentCell().getColumn()][h.getCurrentCell().getRow()]);
-			p[h.getCurrentCell().getColumn()][h.getCurrentCell().getRow()].setFull(true);
+		if (turn > 3) {
+			for (Point po : fulls) {
+				po.setFull(false);
+			}
+			fulls = new ArrayList<Point>();
+			for (Hero h : world.getMyHeroes()) {
+				fulls.add(p[h.getCurrentCell().getColumn()][h.getCurrentCell().getRow()]);
+				p[h.getCurrentCell().getColumn()][h.getCurrentCell().getRow()].setFull(true);
+			}
 		}
 
 		if (turn == 4 && phase == 0) {
@@ -104,7 +107,13 @@ public class Util extends Constants {
 
 	public static Direction dirFromTo(Point fo, Point po) {
 		// no new!
-		Pair<Integer, Integer> pa = new Pair<Integer, Integer>(po.x - fo.x, po.y - fo.y);
-		return dirs.get(pa);
+//		Pair<Integer, Integer> pa = new Pair<Integer, Integer>(po.x - fo.x, po.y - fo.y);
+//		System.out.println((po.x - fo.x) + " - " + (po.y - fo.y));
+//		System.out.println(dirs.get(pa));
+		// O(4)
+		for (int i = 0; i < 4; ++i)
+			if (dx1[i] == po.x - fo.x && dy1[i] == po.y - fo.y)
+				return Direction.values()[i];
+		return null;
 	}
 }

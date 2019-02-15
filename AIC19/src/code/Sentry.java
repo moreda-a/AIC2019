@@ -21,4 +21,10 @@ public class Sentry extends Ahero {
 
 	}
 
+	@Override
+	public void actionHero() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

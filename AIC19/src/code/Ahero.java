@@ -19,4 +19,6 @@ public abstract class Ahero extends Util {// ahero = hero
 	public abstract void doTurn();
 
 	public abstract void moveTurn();
+
+	public abstract void actionHero();
 }

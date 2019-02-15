@@ -1,7 +1,5 @@
 package code;
 
-import java.util.Random;
-
 import client.model.*;
 
 public class Manage extends Util {
@@ -16,12 +14,19 @@ public class Manage extends Util {
 	}
 
 	public static void moveTurn(World world) {
+		startTime = System.currentTimeMillis();
 		update(world);
-		Movement.doTurn(world);
+		System.out.println("FF : " + (System.currentTimeMillis() - startTime));
+		Movement.doTurn();
+		System.out.println("This turn time in client : " + (System.currentTimeMillis() - startTime));
 	}
 
 	public static void actionTurn(World world) {
 		update(world);
+		for (Ahero hero : mHeros) {
+			hero.doTurn();
+			hero.actionHero();
+		}
 //		Util.turn(world);
 //		Hero[] heroes = world.getMyHeroes();
 //		Random random = new Random();

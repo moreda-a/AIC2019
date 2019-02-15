@@ -18,7 +18,13 @@ public class Guardian extends Ahero {
 	@Override
 	public void moveTurn() {
 		// TODO Auto-generated method stub
-		
+
+	}
+
+	@Override
+	public void actionHero() {
+		// TODO Auto-generated method stub
+
 	}
 
 }

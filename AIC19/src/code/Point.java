@@ -73,32 +73,32 @@ public class Point {
 		return null;
 	}
 
-	public int dxTo(Point po) {
-		return po.x - x;
-	}
-
-	public int dyTo(Point po) {
-		return po.y - y;
-	}
-
-	public int dist2(Point po) {
-		return (x - po.x) * (x - po.x) + (y - po.y) * (y - po.y);
-	}
-
+//	public int dxTo(Point po) {
+//		return po.x - x;
+//	}
+//
+//	public int dyTo(Point po) {
+//		return po.y - y;
+//	}
+//
+//	public int dist2(Point po) {
+//		return (x - po.x) * (x - po.x) + (y - po.y) * (y - po.y);
+//	}
+//
 	public int distxy(Point po) {
 		return Math.abs(x - po.x) + Math.abs(y - po.y);
-	}
-
-	@Override
-	public String toString() {
-		return "{x: " + x + ", y: " + y + "}";
 	}
 
 	public int distxy(int ix, int iy) {
 		return Math.abs(x - ix) + Math.abs(y - iy);
 	}
+//
+//	public int dist2(int ix, int iy) {
+//		return (x - ix) * (x - ix) + (y - iy) * (y - iy);
+//	}
 
-	public int dist2(int ix, int iy) {
-		return (x - ix) * (x - ix) + (y - iy) * (y - iy);
+	@Override
+	public String toString() {
+		return "{x: " + x + ", y: " + y + "}";
 	}
 }

@@ -4,7 +4,7 @@ import client.model.*;
 
 public class Movement extends Util {
 
-	public static void doTurn(World world) {
+	public static void doTurn() {
 		for (Ahero hero : mHeros) {
 			hero.doTurn();
 			hero.moveTurn();
