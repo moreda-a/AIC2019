@@ -4,8 +4,8 @@ import client.model.*;
 
 public class Manage extends Util {
 	public static void preProcess(World world) {
-		System.out.println(world.getFirstMoveTimeout());
-		Util.init(world);// util
+		// System.out.println(world.getFirstMoveTimeout());
+		init(world);// util
 	}
 
 	public static void pickTurn(World world) {
@@ -24,7 +24,8 @@ public class Manage extends Util {
 	public static void actionTurn(World world) {
 		update(world);
 		for (Ahero hero : mHeros) {
-			hero.doTurn();
+			if (hero.mhero.getRemRespawnTime() != 0)
+				continue;
 			hero.actionHero();
 		}
 //		Util.turn(world);

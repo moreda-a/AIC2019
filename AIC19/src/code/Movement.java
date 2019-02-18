@@ -1,12 +1,11 @@
 package code;
 
-import client.model.*;
-
 public class Movement extends Util {
 
 	public static void doTurn() {
 		for (Ahero hero : mHeros) {
-			hero.doTurn();
+			if (hero.mhero.getRemRespawnTime() != 0)
+				continue;
 			hero.moveTurn();
 		}
 	}

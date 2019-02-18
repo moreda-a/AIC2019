@@ -10,7 +10,7 @@ public class Sentry extends Ahero {
 	}
 
 	@Override
-	public void doTurn() {
+	public void update() {
 		// TODO Auto-generated method stub
 
 	}

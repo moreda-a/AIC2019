@@ -3,20 +3,28 @@ package code;
 import client.model.*;
 
 public abstract class Ahero extends Util {// ahero = hero
-	public Hero h;
+	public Hero mhero;
 	public Point myp;
+	public Cell mcell;
+	public int mid;
+	public HeroName type;
 
 	public Ahero(Hero h) {
-		this.h = h;
-		myp = cellToPoint(h.getCurrentCell());
+		this.mhero = h;
+		mcell = mhero.getCurrentCell();
+		myp = cellToPoint(mcell);
+
+		mid = mhero.getId();
+		type = mhero.getName();
 	}
 
 	public void updateHero() {
-		h = world.getHero(h.getId());
-		myp = cellToPoint(h.getCurrentCell());
+		mhero = world.getHero(mid);
+		mcell = mhero.getCurrentCell();
+		myp = cellToPoint(mcell);
 	}
 
-	public abstract void doTurn();
+	public abstract void update();
 
 	public abstract void moveTurn();
 

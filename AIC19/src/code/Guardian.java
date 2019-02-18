@@ -10,7 +10,7 @@ public class Guardian extends Ahero {
 	}
 
 	@Override
-	public void doTurn() {
+	public void update() {
 		// TODO Auto-generated method stub
 
 	}

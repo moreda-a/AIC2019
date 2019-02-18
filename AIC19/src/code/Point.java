@@ -10,8 +10,9 @@ public class Point {
 	public boolean inOppRespawnZone;
 	public boolean inObjectiveZone;
 
-	public boolean isInVision;
-	public boolean full = false;
+	public boolean isInVisionGG;
+	public boolean ifull = false;
+	public boolean ofull = false;
 
 //	public int lastTimeChange;
 //	public int robot;
@@ -62,8 +63,12 @@ public class Point {
 		this.inObjectiveZone = cell.isInObjectiveZone();
 	}
 
-	public void setFull(boolean full) {
-		this.full = full;
+	public void setIFull(boolean full) {
+		this.ifull = full;
+	}
+
+	public void setOFull(boolean ofull) {
+		this.ofull = ofull;
 	}
 
 	// return null if you can't go there
@@ -101,4 +106,5 @@ public class Point {
 	public String toString() {
 		return "{x: " + x + ", y: " + y + "}";
 	}
+
 }
