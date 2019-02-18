@@ -4,7 +4,7 @@ public class Movement extends Util {
 
 	public static void doTurn() {
 		for (Ahero hero : mHeros) {
-			if (hero.mhero.getRemRespawnTime() != 0)
+			if (hero.isDead)
 				continue;
 			hero.moveTurn();
 		}

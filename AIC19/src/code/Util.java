@@ -22,6 +22,8 @@ public class Util extends Constants {
 	public static ArrayList<Point> ofulls = new ArrayList<Point>();
 
 	public static HashMap<Pair<Integer, Integer>, Direction> dirs = new HashMap<Pair<Integer, Integer>, Direction>();
+
+	public static int usedAP;
 	// public static Pair<Integer, Integer>[][] pirs;
 
 	public static void init(World world) {
@@ -46,7 +48,7 @@ public class Util extends Constants {
 				"Turn: " + world.getCurrentTurn() + " Phase: " + world.getMovePhaseNum() + " AP: " + world.getAP());
 
 		updateConstants(world);
-
+		usedAP = 0;
 		if (turn == 4 && phase == 0) {
 			for (Hero h : world.getMyHeroes()) {
 				if (h.getName() == HeroName.BLASTER)
@@ -121,6 +123,9 @@ public class Util extends Constants {
 	}
 
 	public static Cell pointToCell(Point po) {
+		// XXX what if po == null ?
+		// go for shit cell ?
+		// TODO!!!
 		return mapp.getCell(po.y, po.x);
 	}
 
@@ -149,20 +154,26 @@ public class Util extends Constants {
 	 * @param endCell   The cell we want to check the vision to
 	 * @return
 	 */
-	boolean isInVision(Cell startCell, Cell endCell) {
+	public boolean isInVision(Cell startCell, Cell endCell) {
 		return world.isInVision(startCell, endCell);
 	}
 
-	boolean isInVision(Point start, Point end) {
+	public boolean isInVision(Point start, Point end) {
 		return world.isInVision(pointToCell(start), pointToCell(end));
 	}
 
-	boolean isInVision(int startCellRow, int startCellColumn, int endCellRow, int endCellColumn) {
+	public boolean isInVision(int startCellRow, int startCellColumn, int endCellRow, int endCellColumn) {
 		return isInVision(startCellRow, startCellColumn, endCellRow, endCellColumn);
 	}
 
 	// can see at all ? F
-	boolean isInVision(Point po) {
+	public boolean isInVision(Point po) {
+		if (po == null)
+			return false;
 		return pointToCell(po).isInVision();
+	}
+
+	public int realAP() {
+		return AP - usedAP;
 	}
 }

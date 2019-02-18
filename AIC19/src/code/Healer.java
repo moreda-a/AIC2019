@@ -21,7 +21,7 @@ public class Healer extends Ahero {
 	}
 
 	@Override
-	public void actionHero() {
+	public void actionTurn() {
 		// TODO Auto-generated method stub
 		
 	}

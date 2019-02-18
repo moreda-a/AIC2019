@@ -27,14 +27,14 @@ public class Blaster extends Ahero {
 		Stack<Point> path = null;
 		// String str = "";
 		if (myp.inObjectiveZone == false) {
-			path = Nav.bfsToObjective(myp);
+			path = Nav.bfsToObjective2(myp);
 		} else {
 			int mindis = 100000;
 			Point qo = null;
 			for (Ahero hh : oHeros) {
 				// str += myp + ":{" + hh.getCurrentCell().getColumn() + ", " +
 				// hh.getCurrentCell().getRow() + "}, ";
-				if (isInVision(hh.myp) && isInVision(myp, hh.myp)) {
+				if (!hh.isDead && isInVision(hh.myp) && isInVision(myp, hh.myp)) {
 					Point po = hh.myp;
 					if (myp.distxy(po) < mindis) {
 						mindis = myp.distxy(po);
@@ -58,15 +58,15 @@ public class Blaster extends Ahero {
 	}
 
 	@Override
-	public void actionHero() {
+	public void actionTurn() {
 		Point v = null;
 		Ability bb = mhero.getAbility(AbilityName.BLASTER_BOMB);
-		System.out.println("hi " + AP + " - " + bb.getRemCooldown());
-		if (bb.getRemCooldown() == 0 && bb.getAPCost() <= AP)
-			for (Hero eh : world.getOppHeroes()) {
+		// System.out.println("hi " + AP + " - " + bb.getRemCooldown());
+		if (bb.getRemCooldown() == 0 && bb.getAPCost() <= realAP())
+			for (Ahero eh : oHeros) {
 				// System.out.println(eh.getCurrentCell());
-				if (eh.getCurrentCell() != null && eh.getCurrentCell().getColumn() != -1)
-					if (myp.distxy(cellToPoint(eh.getCurrentCell())) <= bb.getRange()) {
+				if (eh.mcell != null && eh.mcell.getColumn() != -1)
+					if (myp.distxy(eh.myp) <= bb.getRange()) {
 						v = bestTarget(bb);
 						world.castAbility(mhero, bb, pointToCell(v));
 						break;
@@ -74,16 +74,19 @@ public class Blaster extends Ahero {
 			}
 		if (v == null) {
 			bb = mhero.getAbility(AbilityName.BLASTER_ATTACK);
-			if (bb.getRemCooldown() == 0 && bb.getAPCost() <= AP)
-				for (Hero eh : world.getOppHeroes()) {
-					if (eh.getCurrentCell() != null && eh.getCurrentCell().getColumn() != -1)
-						if (myp.distxy(cellToPoint(eh.getCurrentCell())) <= bb.getRange()) {
+			if (bb.getRemCooldown() == 0 && bb.getAPCost() <= realAP())
+				for (Ahero eh : oHeros) {
+					if (eh.mcell != null && eh.mcell.getColumn() != -1)
+						if (myp.distxy(eh.myp) <= bb.getRange()) {
 							v = bestTarget(bb);
 							world.castAbility(mhero, bb, pointToCell(v));
 							break;
 						}
 				}
 		}
+		if (v != null)
+			usedAP += bb.getAPCost();
+
 		if (AP != world.getAP())
 			System.out.println("-------------JESUS------------");// sad no jesus here
 	}
@@ -93,13 +96,15 @@ public class Blaster extends Ahero {
 		Point be = null;
 		for (int dx = -ab.getRange(); dx <= ab.getRange(); ++dx) {
 			for (int dy = -(ab.getRange() - Math.abs(dx)); dy <= (ab.getRange() - Math.abs(dx)); ++dy) {
-				if (!ab.isLobbing()
+				if (!ab.isLobbing() && !isInMap(myp.x + dx, myp.y + dy)
 						&& !world.isInVision(mhero.getCurrentCell(), world.getMap().getCell(myp.y + dy, myp.x + dx)))
 					continue;
 				int k = 0;
 				for (int tx = -ab.getAreaOfEffect(); tx <= ab.getAreaOfEffect(); ++tx) {
 					for (int ty = -(ab.getAreaOfEffect() - Math.abs(tx)); ty <= (ab.getAreaOfEffect()
 							- Math.abs(tx)); ++ty) {
+						if (!isInMap(myp.x + dx + tx, myp.y + dy + ty))
+							continue;
 						if (p[myp.x + dx + tx][myp.y + dy + ty].ofull)
 							++k;
 					}

@@ -24,9 +24,9 @@ public class Manage extends Util {
 	public static void actionTurn(World world) {
 		update(world);
 		for (Ahero hero : mHeros) {
-			if (hero.mhero.getRemRespawnTime() != 0)
+			if (hero.isDead)
 				continue;
-			hero.actionHero();
+			hero.actionTurn();
 		}
 //		Util.turn(world);
 //		Hero[] heroes = world.getMyHeroes();
