@@ -15,7 +15,6 @@ public class AI {
 
 	public void moveTurn(World world) {
 		Manage.moveTurn(world);
-
 	}
 
 	public void actionTurn(World world) {

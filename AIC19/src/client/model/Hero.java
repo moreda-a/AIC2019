@@ -86,8 +86,7 @@ public class Hero
         this.id = id;
     }
 
-    // CHANAGE XXX
-    public HeroConstants getHeroConstants()
+    HeroConstants getHeroConstants()
     {
         return heroConstants;
     }
