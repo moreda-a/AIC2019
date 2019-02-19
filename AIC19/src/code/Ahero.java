@@ -9,12 +9,16 @@ public abstract class Ahero extends Util {// ahero = hero
 	public int mid;
 	public HeroName type;
 	public boolean isDead;
+	public int mhp;
+	public int mrrt;
 
 	public Ahero(Hero h) {
 		this.mhero = h;
 		mcell = mhero.getCurrentCell();
 		myp = cellToPoint(mcell);
 
+		mrrt = mhero.getRemRespawnTime();
+		mhp = mhero.getCurrentHP();
 		mid = mhero.getId();
 		type = mhero.getName();
 		isDead = false;
@@ -26,8 +30,10 @@ public abstract class Ahero extends Util {// ahero = hero
 		mhero = world.getHero(mid);
 		mcell = mhero.getCurrentCell();
 		myp = cellToPoint(mcell);
+		mhp = mhero.getCurrentHP();
+		mrrt = mhero.getRemRespawnTime();
 		isDead = false;
-		if (mhero.getRemRespawnTime() != 0)
+		if (mrrt != 0)
 			isDead = true;
 	}
 
