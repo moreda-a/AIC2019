@@ -11,6 +11,7 @@ public abstract class Ahero extends Util {// ahero = hero
 	public boolean isDead;
 	public int mhp;
 	public int mrrt;
+	public int moveCost;
 
 	public Ahero(Hero h) {
 		this.mhero = h;
@@ -21,6 +22,8 @@ public abstract class Ahero extends Util {// ahero = hero
 		mhp = mhero.getCurrentHP();
 		mid = mhero.getId();
 		type = mhero.getName();
+		moveCost = mhero.getMoveAPCost();
+
 		isDead = false;
 		if (mhero.getRemRespawnTime() != 0)
 			isDead = true;

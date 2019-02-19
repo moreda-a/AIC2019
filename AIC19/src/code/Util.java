@@ -21,6 +21,8 @@ public class Util extends Constants {
 	public static ArrayList<Point> mfulls = new ArrayList<Point>();
 	public static ArrayList<Point> ofulls = new ArrayList<Point>();
 
+	public static ArrayList<Ahero> seenO;
+
 	public static HashMap<Pair<Integer, Integer>, Direction> dirs = new HashMap<Pair<Integer, Integer>, Direction>();
 
 	public static int usedAP;
@@ -99,6 +101,11 @@ public class Util extends Constants {
 					p[h.getCurrentCell().getColumn()][h.getCurrentCell().getRow()].setOFull(true);
 				}
 			}
+			seenO = new ArrayList<Ahero>();
+			for (Ahero hero : oHeros) {
+				// check is in vision
+				seenO.add(hero);
+			}
 		}
 	}
 
@@ -154,17 +161,19 @@ public class Util extends Constants {
 	 * @param endCell   The cell we want to check the vision to
 	 * @return
 	 */
-	public boolean isInVision(Cell startCell, Cell endCell) {
-		return world.isInVision(startCell, endCell);
-	}
+//	public boolean isInVision(Cell startCell, Cell endCell) {
+//		return world.isInVision(startCell, endCell);
+//	}
 
 	public boolean isInVision(Point start, Point end) {
+		if (end == null || start == null)
+			return false;
 		return world.isInVision(pointToCell(start), pointToCell(end));
 	}
 
-	public boolean isInVision(int startCellRow, int startCellColumn, int endCellRow, int endCellColumn) {
-		return isInVision(startCellRow, startCellColumn, endCellRow, endCellColumn);
-	}
+//	public boolean isInVision(int startCellRow, int startCellColumn, int endCellRow, int endCellColumn) {
+//		return isInVision(startCellRow, startCellColumn, endCellRow, endCellColumn);
+//	}
 
 	// can see at all ? F
 	public boolean isInVision(Point po) {
@@ -175,5 +184,9 @@ public class Util extends Constants {
 
 	public int realAP() {
 		return AP - usedAP;
+	}
+
+	public static void addHero() {
+		world.pickHero(nextHero);
 	}
 }
