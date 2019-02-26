@@ -5,7 +5,7 @@ import client.model.Cell;
 public class Point {
 	public int x;
 	public int y;
-	public boolean wall;
+	public boolean isWall;
 	public boolean inMyRespawnZone;
 	public boolean inOppRespawnZone;
 	public boolean inObjectiveZone;
@@ -13,6 +13,7 @@ public class Point {
 	public boolean isInVisionGG;
 	public boolean ifull = false;
 	public boolean ofull = false;
+	public boolean icamp = false;
 
 //	public int lastTimeChange;
 //	public int robot;
@@ -57,7 +58,7 @@ public class Point {
 	public Point(int x, int y, Cell cell) {
 		this.x = x;
 		this.y = y;
-		this.wall = cell.isWall();
+		this.isWall = cell.isWall();
 		this.inMyRespawnZone = cell.isInMyRespawnZone();
 		this.inOppRespawnZone = cell.isInOppRespawnZone();
 		this.inObjectiveZone = cell.isInObjectiveZone();

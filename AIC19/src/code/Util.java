@@ -9,6 +9,7 @@ import client.model.*;
 public class Util extends Constants {
 	// static class
 
+	public static int[][] dis;
 	public static Point[][] p;
 	public static Point pm1;
 
@@ -45,6 +46,8 @@ public class Util extends Constants {
 		for (int i = 0; i < 4; ++i) {
 			dirs.put(new Pair<Integer, Integer>(dx1[i], dy1[i]), Direction.values()[i]);
 		}
+		dis = new int[size][size];
+		Nav.allPairShortestPath();
 	}
 
 	public static void update(World world) {
@@ -140,8 +143,26 @@ public class Util extends Constants {
 		return mapp.getCell(po.y, po.x);
 	}
 
-	public static void moveHero(Hero hero, Point po) {
-		world.moveHero(hero, dirFromTo(cellToPoint(hero.getCurrentCell()), po));
+	public static void moveHero(Ahero hero, Point targetPoint) {
+		Point lastMyp = hero.myp;
+		world.moveHero(hero.mhero, dirFromTo(lastMyp, targetPoint));
+		// updateHeroAfterMove(hero);
+
+		// if move is ok!?!?!?! //TODO
+		if (targetPoint == null)
+			return;
+		hero.moved = true;
+
+		hero.myp = targetPoint;
+
+		if (!mfulls.contains(lastMyp))
+			System.err.println("WTF1");
+		mfulls.remove(lastMyp);
+		mfulls.add(targetPoint);
+		if (!lastMyp.ifull)
+			System.err.println("WTF1");
+		lastMyp.ifull = false;
+		targetPoint.ifull = true;
 	}
 
 	public static Direction dirFromTo(Point fo, Point po) {
@@ -192,5 +213,13 @@ public class Util extends Constants {
 
 	public static void addHero() {
 		world.pickHero(nextHero);
+	}
+
+	public static int v(int x, int y) {
+		return y * xNum + x;
+	}
+
+	public static int v(Point po) {
+		return po.y * xNum + po.x;
 	}
 }

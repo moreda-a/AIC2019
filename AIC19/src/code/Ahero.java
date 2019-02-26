@@ -7,11 +7,14 @@ import client.model.*;
 
 public abstract class Ahero extends Util {// ahero = hero
 	public Hero mhero;
+	// private Cell mcell;
+	public boolean moved;
+
 	public Point myp;
-	public Cell mcell;
 	public int mid;
 	public HeroName type;
 	public boolean isDead;
+	public boolean isInVision;
 	public int mhp;
 	public int mrrt;
 	public int moveCost;
@@ -63,7 +66,7 @@ public abstract class Ahero extends Util {// ahero = hero
 
 	public Ahero(Hero h) {
 		this.mhero = h;
-		mcell = mhero.getCurrentCell();
+		Cell mcell = mhero.getCurrentCell();
 		myp = cellToPoint(mcell);
 
 		a1 = mhero.getAbilities()[0];
@@ -106,8 +109,9 @@ public abstract class Ahero extends Util {// ahero = hero
 	}
 
 	public void updateHero() {
+		moved = false;
 		mhero = world.getHero(mid);
-		mcell = mhero.getCurrentCell();
+		Cell mcell = mhero.getCurrentCell();
 		myp = cellToPoint(mcell);
 
 		a1 = mhero.getAbilities()[0];
@@ -127,6 +131,10 @@ public abstract class Ahero extends Util {// ahero = hero
 		isDead = false;
 		if (mrrt != 0)
 			isDead = true;
+
+		isInVision = true;
+		if (mcell == null || mcell.getColumn() == -1)
+			isInVision = false;
 	}
 
 	public abstract void update();
@@ -134,4 +142,6 @@ public abstract class Ahero extends Util {// ahero = hero
 	public abstract void moveTurn();
 
 	public abstract void actionTurn();
+
+	public abstract Point getNewDodge();
 }

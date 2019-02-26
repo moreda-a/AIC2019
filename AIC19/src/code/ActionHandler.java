@@ -57,6 +57,8 @@ public class ActionHandler extends Util {
 
 	private static void doBestActions(ArrayList<Action> bestTurnAction) {
 		for (Action ac : bestTurnAction) {
+			if (ac.isNothing)
+				continue;
 			ac.doAction();
 		}
 
@@ -77,6 +79,8 @@ public class ActionHandler extends Util {
 			}
 		}
 		for (Ahero hero : oHeros.values()) {
+			if (!hero.isInVision)
+				continue;
 			damage += Math.min(hero.mhp, hero.potDamage);
 			hero.potDamage = 0;
 		}
@@ -90,7 +94,7 @@ public class ActionHandler extends Util {
 		// for now use this : Hero[] getAbilityTargets(Ability,Cell, Cell);
 		// might be slow!!!!!
 
-		Hero[] hs = world.getAbilityTargets(ac.ability, ac.ahero.mcell, ac.targetCell);
+		Hero[] hs = world.getAbilityTargets(ac.ability, pointToCell(ac.ahero.myp), pointToCell(ac.targetPoint));
 		if (ac.ability.getName() == AbilityName.SENTRY_RAY && hs.length == 0)
 			System.out.println("sentry ray BAD: " + hs + " - " + hs.length);
 		if (ac.ability.getName() == AbilityName.SENTRY_ATTACK && hs.length == 0)

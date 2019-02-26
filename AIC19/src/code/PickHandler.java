@@ -6,7 +6,8 @@ public class PickHandler extends Util {
 
 	public static void doTurn() {
 		// world.pickHero(HeroName.values()[world.getCurrentTurn()]);
-		b3s1();
+		// b3s1();
+		b4();
 	}
 
 	@SuppressWarnings("unused")
@@ -36,6 +37,7 @@ public class PickHandler extends Util {
 		addHero();
 	}
 
+	@SuppressWarnings("unused")
 	private static void b3s1() {
 		if (turn == 0)
 			nextHero = HeroName.BLASTER;

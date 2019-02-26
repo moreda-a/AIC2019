@@ -26,4 +26,10 @@ public class Healer extends Ahero {
 		
 	}
 
+	@Override
+	public Point getNewDodge() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

@@ -12,8 +12,8 @@ public class Sentry extends Ahero {
 	public boolean waitingForAttack;
 	public int rayCost;
 	public int attackCost;
-	public Ability ray;
-	public Ability attack;
+//	public Ability ray;
+//	public Ability attack;
 	public boolean isInDanger;
 	public boolean canRunAway;
 	public boolean canFight;
@@ -22,16 +22,16 @@ public class Sentry extends Ahero {
 		super(h);
 		waitingForRay = false;
 		waitingForAttack = false;
-		rayCost = h.getAbility(AbilityName.SENTRY_RAY).getAPCost();
-		attackCost = h.getAbility(AbilityName.SENTRY_ATTACK).getAPCost();
+		// rayCost = h.getAbility(AbilityName.SENTRY_RAY).getAPCost();
+		// attackCost = h.getAbility(AbilityName.SENTRY_ATTACK).getAPCost();
 		// TODO Auto-generated constructor stub
 	}
 
 	@Override
 	public void update() {
 		updateHero();
-		ray = mhero.getAbility(AbilityName.SENTRY_RAY);
-		attack = mhero.getAbility(AbilityName.SENTRY_ATTACK);
+		// ray = mhero.getAbility(AbilityName.SENTRY_RAY);
+		// attack = mhero.getAbility(AbilityName.SENTRY_ATTACK);
 	}
 
 	@Override
@@ -51,7 +51,7 @@ public class Sentry extends Ahero {
 			Point po = tryToRunAway();
 			if (po != null) {
 				if (realAP() >= moveCost) {
-					moveHero(mhero, po);
+					moveHero(this, po);
 					usedAP += moveCost;
 				}
 			} else {
@@ -94,7 +94,7 @@ public class Sentry extends Ahero {
 					}
 					if (mainPath != null && mainPath.size() != 0) {
 						if (realAP() >= moveCost) {
-							moveHero(mhero, mainPath.peek());
+							moveHero(this, mainPath.peek());
 							usedAP += moveCost;
 						}
 					}
@@ -105,7 +105,7 @@ public class Sentry extends Ahero {
 						mainPath = Nav.bfsToObjective2(myp);
 					if (mainPath != null && mainPath.size() != 0) {
 						if (realAP() >= moveCost) {
-							moveHero(mhero, mainPath.peek());
+							moveHero(this, mainPath.peek());
 							usedAP += moveCost;
 						}
 					}
@@ -131,7 +131,7 @@ public class Sentry extends Ahero {
 	private Point tryToRunAway() {
 		for (Direction1 dir : Direction1.values()) {
 			Point po = myp.dir1To(dir);
-			if (po != null && !po.wall && !po.ifull) {
+			if (po != null && !po.isWall && !po.ifull) {
 				boolean nsafe = false;
 				for (Ahero hero : seenO) {
 					if (hero.myp.distxy(po) < 7)
@@ -188,7 +188,7 @@ public class Sentry extends Ahero {
 		if (bb.getRemCooldown() == 0 && bb.getAPCost() <= realAP())
 			for (Ahero eh : oHeros.values()) {
 				// System.out.println(eh.getCurrentCell());
-				if (eh.mcell != null && eh.mcell.getColumn() != -1) {
+				if (eh.isInVision) {
 					// a bug here btw TODO
 					// if (myp.distxy(eh.myp) <= bb.getRange()) {
 					// v = bestTarget(bb);
@@ -202,7 +202,7 @@ public class Sentry extends Ahero {
 		bb = a1;
 		if (bb.getRemCooldown() == 0 && bb.getAPCost() <= realAP())
 			for (Ahero eh : oHeros.values()) {
-				if (eh.mcell != null && eh.mcell.getColumn() != -1)
+				if (eh.isInVision)
 					if (myp.distxy(eh.myp) <= bb.getRange()) {
 						// here too TODO
 						// v = bestTarget(bb);
@@ -242,6 +242,12 @@ public class Sentry extends Ahero {
 			}
 		}
 		return be;
+	}
+
+	@Override
+	public Point getNewDodge() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

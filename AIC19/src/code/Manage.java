@@ -4,36 +4,30 @@ import client.model.*;
 
 public class Manage extends Util {
 	public static void preProcess(World world) {
-		// System.out.println(world.getFirstMoveTimeout());
-		init(world);// util
+		startTime = System.currentTimeMillis();
+		init(world);
+		System.out.println("This preprocess time in client : " + (System.currentTimeMillis() - startTime));
 	}
 
 	public static void pickTurn(World world) {
+		startTime = System.currentTimeMillis();
 		update(world);
 		PickHandler.doTurn();
+		System.out.println("This pick turn time in client : " + (System.currentTimeMillis() - startTime));
 	}
 
 	public static void moveTurn(World world) {
 		startTime = System.currentTimeMillis();
 		update(world);
-		System.out.println("FF : " + (System.currentTimeMillis() - startTime));
 		Movement.doTurn();
-		System.out.println("This turn time in client : " + (System.currentTimeMillis() - startTime));
+		System.out.println("This move turn time in client : " + (System.currentTimeMillis() - startTime));
 	}
 
 	public static void actionTurn(World world) {
+		startTime = System.currentTimeMillis();
 		update(world);
-
 		ActionHandler.doTurn();
-//		Util.turn(world);
-//		Hero[] heroes = world.getMyHeroes();
-//		Random random = new Random();
-//		Map map = world.getMap();
-//		for (Hero hero : heroes) {
-//			int row = random.nextInt(map.getRowNum());
-//			int column = random.nextInt(map.getColumnNum());
-//
-//			world.castAbility(hero, hero.getAbilities()[random.nextInt(3)], row, column);
-//		}
+		System.out.println("This action turn time in client : " + (System.currentTimeMillis() - startTime));
+
 	}
 }

@@ -1,5 +1,6 @@
 package code;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -20,7 +21,7 @@ public class Nav extends Util {
 			it = que.poll();
 			for (Direction1 dir : Direction1.values()) {
 				ie = it.dir1To(dir);
-				if (ie != null && !parent.containsKey(ie) && !ie.wall && (!ie.ifull || start != it)) {
+				if (ie != null && !parent.containsKey(ie) && !ie.isWall && (!ie.ifull || start != it)) {
 					que.add(ie);
 					parent.put(ie, it);
 					if (ie == end) {
@@ -55,7 +56,7 @@ public class Nav extends Util {
 			it = que.poll();
 			for (Direction1 dir : Direction1.values()) {
 				ie = it.dir1To(dir);
-				if (ie != null && !parent.containsKey(ie) && !ie.wall && !ie.ifull) {
+				if (ie != null && !parent.containsKey(ie) && !ie.isWall && !ie.ifull) {
 					que.add(ie);
 					parent.put(ie, it);
 					if (ie == end) {
@@ -87,7 +88,7 @@ public class Nav extends Util {
 			it = que.poll();
 			for (Direction1 dir : Direction1.values()) {
 				ie = it.dir1To(dir);
-				if (ie != null && !parent.containsKey(ie) && !ie.wall && !ie.ifull) {
+				if (ie != null && !parent.containsKey(ie) && !ie.isWall && !ie.ifull) {
 					que.add(ie);
 					parent.put(ie, it);
 					if (ie.inObjectiveZone == true) {
@@ -119,7 +120,7 @@ public class Nav extends Util {
 			it = que.poll();
 			for (Direction1 dir : Direction1.values()) {
 				ie = it.dir1To(dir);
-				if (ie != null && !parent.containsKey(ie) && !ie.wall && (!ie.ifull || start != it)) {
+				if (ie != null && !parent.containsKey(ie) && !ie.isWall && (!ie.ifull || start != it)) {
 					que.add(ie);
 					parent.put(ie, it);
 					if (ie.inObjectiveZone == true) {
@@ -134,5 +135,44 @@ public class Nav extends Util {
 			}
 		}
 		return null;
+	}
+
+	public static void allPairShortestPath() {
+		for (int x = 0; x < xNum; ++x)
+			for (int y = 0; y < yNum; ++y) {
+				dis[v(x, y)] = bfsDis(p[x][y]);
+			}
+
+	}
+
+	private static int[] bfsDis(Point start) {
+		// end point not full
+		// hero == wall
+		// bfs order for search E = 4 * 961
+		// System.out.println(start + " - " + end);
+		Point it, ie, ic;
+		// Stack<Point> path = new Stack<Point>();
+		HashMap<Point, Point> parent = new HashMap<Point, Point>();
+		// can be faster by parent-> array
+		Queue<Point> que = new LinkedList<Point>();
+		int[] dd = new int[size];
+		Arrays.fill(dd, -1);
+		que.add(start);
+		parent.put(start, null);
+		dd[v(start)] = 0;
+
+		while (!que.isEmpty()) {
+			it = que.poll();
+			for (Direction1 dir : Direction1.values()) {
+				ie = it.dir1To(dir);
+				if (ie != null && !parent.containsKey(ie) && !ie.isWall) {
+					que.add(ie);
+					parent.put(ie, it);
+					dd[v(ie)] = dd[v(it)] + 1;
+				}
+			}
+		}
+		return dd;
+
 	}
 }

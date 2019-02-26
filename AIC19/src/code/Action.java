@@ -8,7 +8,7 @@ public class Action extends Util {
 	Hero mhero;
 	Ability ability;
 	Point targetPoint;
-	Cell targetCell;
+
 	Boolean isNothing = false;
 
 	public Action(Ahero ahero, Ability bb, Point targetPoint) {
@@ -16,7 +16,6 @@ public class Action extends Util {
 		this.mhero = ahero.mhero;
 		this.ability = bb;
 		this.targetPoint = targetPoint;
-		this.targetCell = pointToCell(targetPoint);
 	}
 
 	public Action() {
@@ -24,6 +23,25 @@ public class Action extends Util {
 	}
 
 	public void doAction() {
-		world.castAbility(mhero, ability, targetCell);
+		System.out.println(targetPoint + " " + targetPoint.ifull);
+		if (ability.getType() == AbilityType.DODGE) {
+			if (targetPoint.ifull) {
+				targetPoint = ahero.getNewDodge();
+				if (targetPoint == null)
+					return;
+			}
+			Point lastMyp = ahero.myp;
+			ahero.myp = targetPoint;
+
+			if (!mfulls.contains(lastMyp))
+				System.err.println("WTF1");
+			mfulls.remove(lastMyp);
+			mfulls.add(targetPoint);
+			if (!lastMyp.ifull)
+				System.err.println("WTF1");
+			lastMyp.ifull = false;
+			targetPoint.ifull = true;
+		}
+		world.castAbility(mhero, ability, pointToCell(targetPoint));
 	}
 }
