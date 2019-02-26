@@ -2,6 +2,7 @@ package code;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map.Entry;
 
 import client.model.*;
 
@@ -15,8 +16,8 @@ public class Util extends Constants {
 
 	public static long startTime;
 
-	public static ArrayList<Ahero> mHeros = new ArrayList<Ahero>();
-	public static ArrayList<Ahero> oHeros = new ArrayList<Ahero>();
+	public static HashMap<Integer, Ahero> mHeros = new HashMap<Integer, Ahero>();
+	public static HashMap<Integer, Ahero> oHeros = new HashMap<Integer, Ahero>();
 
 	public static ArrayList<Point> mfulls = new ArrayList<Point>();
 	public static ArrayList<Point> ofulls = new ArrayList<Point>();
@@ -26,6 +27,7 @@ public class Util extends Constants {
 	public static HashMap<Pair<Integer, Integer>, Direction> dirs = new HashMap<Pair<Integer, Integer>, Direction>();
 
 	public static int usedAP;
+	public static int resAP;
 	// public static Pair<Integer, Integer>[][] pirs;
 
 	public static void init(World world) {
@@ -46,38 +48,40 @@ public class Util extends Constants {
 	}
 
 	public static void update(World world) {
-		System.out.println(
-				"Turn: " + world.getCurrentTurn() + " Phase: " + world.getMovePhaseNum() + " AP: " + world.getAP());
-
 		updateConstants(world);
+		System.out.println("Turn: " + turn + " Phase: " + phase + " AP: " + AP);
+
 		usedAP = 0;
+		if (phase == 0)
+			resAP = 0;
+
 		if (turn == 4 && phase == 0) {
 			for (Hero h : world.getMyHeroes()) {
 				if (h.getName() == HeroName.BLASTER)
-					mHeros.add(new Blaster(h));
+					mHeros.put(h.getId(), new Blaster(h));
 				else if (h.getName() == HeroName.SENTRY)
-					mHeros.add(new Sentry(h));
+					mHeros.put(h.getId(), new Sentry(h));
 				else if (h.getName() == HeroName.HEALER)
-					mHeros.add(new Healer(h));
+					mHeros.put(h.getId(), new Healer(h));
 				else if (h.getName() == HeroName.GUARDIAN)
-					mHeros.add(new Guardian(h));
+					mHeros.put(h.getId(), new Guardian(h));
 			}
 			for (Hero h : world.getOppHeroes()) {
 				if (h.getName() == HeroName.BLASTER)
-					oHeros.add(new Blaster(h));
+					oHeros.put(h.getId(), new Blaster(h));
 				else if (h.getName() == HeroName.SENTRY)
-					oHeros.add(new Sentry(h));
+					oHeros.put(h.getId(), new Sentry(h));
 				else if (h.getName() == HeroName.HEALER)
-					oHeros.add(new Healer(h));
+					oHeros.put(h.getId(), new Healer(h));
 				else if (h.getName() == HeroName.GUARDIAN)
-					oHeros.add(new Guardian(h));
+					oHeros.put(h.getId(), new Guardian(h));
 			}
 		}
 
 		if (turn > 3) {
-			for (Ahero hero : mHeros)
+			for (Ahero hero : mHeros.values())
 				hero.update();
-			for (Ahero hero : oHeros)
+			for (Ahero hero : oHeros.values())
 				hero.update();
 
 			for (Point po : mfulls) {
@@ -102,7 +106,7 @@ public class Util extends Constants {
 				}
 			}
 			seenO = new ArrayList<Ahero>();
-			for (Ahero hero : oHeros) {
+			for (Ahero hero : oHeros.values()) {
 				// check is in vision
 				seenO.add(hero);
 			}
@@ -183,7 +187,7 @@ public class Util extends Constants {
 	}
 
 	public int realAP() {
-		return AP - usedAP;
+		return AP - usedAP - resAP;
 	}
 
 	public static void addHero() {

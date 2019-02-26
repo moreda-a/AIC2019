@@ -3,7 +3,7 @@ package code;
 public class Movement extends Util {
 
 	public static void doTurn() {
-		for (Ahero hero : mHeros) {
+		for (Ahero hero : mHeros.values()) {
 			if (hero.isDead)
 				continue;
 			hero.moveTurn();

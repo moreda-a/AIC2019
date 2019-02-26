@@ -10,7 +10,7 @@ public class Manage extends Util {
 
 	public static void pickTurn(World world) {
 		update(world);
-		Pick.doTurn();
+		PickHandler.doTurn();
 	}
 
 	public static void moveTurn(World world) {
@@ -23,11 +23,8 @@ public class Manage extends Util {
 
 	public static void actionTurn(World world) {
 		update(world);
-		for (Ahero hero : mHeros) {
-			if (hero.isDead)
-				continue;
-			hero.actionTurn();
-		}
+
+		ActionHandler.doTurn();
 //		Util.turn(world);
 //		Hero[] heroes = world.getMyHeroes();
 //		Random random = new Random();

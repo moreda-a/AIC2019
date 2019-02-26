@@ -1,5 +1,6 @@
 package code;
 
+import java.util.ArrayList;
 import java.util.Stack;
 
 import client.model.Ability;
@@ -7,99 +8,212 @@ import client.model.AbilityName;
 import client.model.Hero;
 
 public class Sentry extends Ahero {
+	public boolean waitingForRay;
+	public boolean waitingForAttack;
+	public int rayCost;
+	public int attackCost;
+	public Ability ray;
+	public Ability attack;
+	public boolean isInDanger;
+	public boolean canRunAway;
+	public boolean canFight;
 
 	public Sentry(Hero h) {
 		super(h);
+		waitingForRay = false;
+		waitingForAttack = false;
+		rayCost = h.getAbility(AbilityName.SENTRY_RAY).getAPCost();
+		attackCost = h.getAbility(AbilityName.SENTRY_ATTACK).getAPCost();
 		// TODO Auto-generated constructor stub
 	}
 
 	@Override
 	public void update() {
 		updateHero();
+		ray = mhero.getAbility(AbilityName.SENTRY_RAY);
+		attack = mhero.getAbility(AbilityName.SENTRY_ATTACK);
 	}
 
 	@Override
 	public void moveTurn() {
 		System.out.println("Sentry: " + mid + " - " + mhp);
-		if (realAP() < moveCost)
-			return;
+		mainPath = null;
+		// process
+		stateCheck();
+		// move handler
 		// Random random = new Random();
 		// System.out.println("FF2 : " + (System.currentTimeMillis() - startTime));
 //		Stack<Point> path = Nav.simpleBFS2(myp, cellToPoint(
 //				world.getMap().getObjectiveZone()[random.nextInt(world.getMap().getObjectiveZone().length)]));
-		Stack<Point> path = null;
-		// String str = "";
-		int fp = 0;
-		for (Ahero hero : oHeros) {
-			if (isInVision(myp, hero.myp))
-				++fp;
-		}
-		if (myp.inObjectiveZone == false && fp == 0) {
-			path = Nav.bfsToObjective2(myp);
+
+		if (isInDanger) {
+			// System.out.println("isInDanger");
+			Point po = tryToRunAway();
+			if (po != null) {
+				if (realAP() >= moveCost) {
+					moveHero(mhero, po);
+					usedAP += moveCost;
+				}
+			} else {
+				// what should i do ? :(
+				// stay and fight ?
+				// change position for next rounds
+				// take better position
+				// now stay and fight
+			}
 		} else {
-//			int mindis = 100000;
-//			Point qo = null;
-//			for (Ahero hh : oHeros) {
-//				// str += myp + ":{" + hh.getCurrentCell().getColumn() + ", " +
-//				// hh.getCurrentCell().getRow() + "}, ";
-//				if (!hh.isDead && isInVision(hh.myp) && isInVision(myp, hh.myp)) {
-//					Point po = hh.myp;
-//					if (myp.distxy(po) < mindis) {
-//						mindis = myp.distxy(po);
-//						qo = po;
-//					}
-//				}
-//			}
-//			if (qo != null && myp.distxy(qo) > 4) {
-//				path = Nav.simpleBFS2(myp, qo);
-//			}
+			if (canFight) {
+				// System.out.println("canFight");
+				if (!waitingForAttack && !waitingForRay)
+					tryToFight();
+			} else {// maybe can fight but cost issue
+				if (waitingForAttack) {
+					waitingForAttack = false;
+					resAP -= cost1;
+				}
+				if (waitingForRay) {
+					waitingForRay = false;
+					resAP -= cost3;
+				}
+				if (seenO.size() != 0) {
+					System.out.println("here");
+					// go to enemy(respect distance)
+					int mindis = 100000;
+					Point qo = null;
+					for (Ahero hh : seenO) {
+						// str += myp + ":{" + hh.getCurrentCell().getColumn() + ", " +
+						// hh.getCurrentCell().getRow() + "}, ";
+						Point po = hh.myp;
+						if (myp.distxy(po) < mindis) {
+							mindis = myp.distxy(po);
+							qo = po;
+						}
+					}
+					if (qo != null && myp.distxy(qo) > 6) {
+						mainPath = Nav.simpleBFS2(myp, qo);
+					}
+					if (mainPath != null && mainPath.size() != 0) {
+						if (realAP() >= moveCost) {
+							moveHero(mhero, mainPath.peek());
+							usedAP += moveCost;
+						}
+					}
+				} else {
+					// System.out.println("shit");
+					// go to objective zone
+					if (!myp.inObjectiveZone)
+						mainPath = Nav.bfsToObjective2(myp);
+					if (mainPath != null && mainPath.size() != 0) {
+						if (realAP() >= moveCost) {
+							moveHero(mhero, mainPath.peek());
+							usedAP += moveCost;
+						}
+					}
+				}
+
+			}
 		}
-		if (path != null && path.size() != 0) {
-			moveHero(mhero, path.peek());
-			usedAP += moveCost;
-		} else {
-			// System.out.println("DDDFuck ? " + str);
+	}
+
+	private void tryToFight() {
+		if (seenA3.size() != 0 && isReady3 && realAP() >= cost3) {
+			waitingForRay = true;
+			resAP += cost3;
 		}
-		// System.out.println("pp: " + path.size());
-		// world.moveHero(hero, Direction.values()[random.nextInt(4)]);
-		// System.out.println("FF3 : " + (System.currentTimeMillis() - startTime));
-		// System.out.println(path.peek() + " - " + path.peek().full);
+		// isReady1 == true
+		if (!waitingForRay && seenA1.size() != 0 && isReady1 && realAP() >= cost1) {
+			waitingForAttack = true;
+			resAP += cost1;
+		}
+
+	}
+
+	private Point tryToRunAway() {
+		for (Direction1 dir : Direction1.values()) {
+			Point po = myp.dir1To(dir);
+			if (po != null && !po.wall && !po.ifull) {
+				boolean nsafe = false;
+				for (Ahero hero : seenO) {
+					if (hero.myp.distxy(po) < 7)
+						nsafe = true;
+				}
+				if (!nsafe)
+					return po;
+			}
+		}
+		return null;
+	}
+
+	private void stateCheck() {
+		seenO = new ArrayList<Ahero>();
+		seenA1 = new ArrayList<Ahero>();
+		seenA3 = new ArrayList<Ahero>();
+		isInDanger = false;
+		canFight = false;
+		for (Ahero hero : oHeros.values()) {
+			if (!isInVision(hero.myp))
+				continue;
+			seenO.add(hero);
+			if (isInVision(myp, hero.myp)) {
+				seenA3.add(hero);
+				if (myp.distxy(hero.myp) <= 7)
+					seenA1.add(hero);
+			}
+			if (myp.distxy(hero.myp) <= 6)
+				isInDanger = true;
+		}
+		if (seenA3.size() != 0 && isReady3 && (realAP() >= cost3 || waitingForRay))
+			canFight = true;
+		// isReady1 == true
+		if (seenA1.size() != 0 && isReady1 && (realAP() >= cost1 || waitingForAttack))
+			canFight = true;
+		// System.out.println(isReady3);
+
 	}
 
 	@Override
 	public void actionTurn() {
+		actionList = new ArrayList<Action>();
+		actionList.add(new Action());
+		// System.out.println("S + " + resAP + " - " + AP + " - " + usedAP);
+//		if (waitingForRay == true)
+//			resAP -= cost3;
+//		if (waitingForAttack == true)
+//			resAP -= cost1;
+		waitingForRay = false;
+		waitingForAttack = false;
 		Point v = null;
-		Ability bb = mhero.getAbility(AbilityName.SENTRY_RAY);
+		Ability bb = a3;
 		// System.out.println("hi " + AP + " - " + bb.getRemCooldown());
 		if (bb.getRemCooldown() == 0 && bb.getAPCost() <= realAP())
-			for (Ahero eh : oHeros) {
+			for (Ahero eh : oHeros.values()) {
 				// System.out.println(eh.getCurrentCell());
 				if (eh.mcell != null && eh.mcell.getColumn() != -1) {
 					// a bug here btw TODO
 					// if (myp.distxy(eh.myp) <= bb.getRange()) {
 					// v = bestTarget(bb);
 					v = eh.myp;
-					world.castAbility(mhero, bb, pointToCell(v));
+					actionList.add(new Action(this, bb, v));
 					break;
 					// }
 				}
 			}
-		if (v == null) {
-			bb = mhero.getAbility(AbilityName.SENTRY_ATTACK);
-			if (bb.getRemCooldown() == 0 && bb.getAPCost() <= realAP())
-				for (Ahero eh : oHeros) {
-					if (eh.mcell != null && eh.mcell.getColumn() != -1)
-						if (myp.distxy(eh.myp) <= bb.getRange()) {
-							// here too TODO
-							// v = bestTarget(bb);
-							v = eh.myp;
-							world.castAbility(mhero, bb, pointToCell(v));
-							break;
-						}
-				}
-		}
-		if (v != null)
-			usedAP += bb.getAPCost();
+		// if (v == null) {
+		bb = a1;
+		if (bb.getRemCooldown() == 0 && bb.getAPCost() <= realAP())
+			for (Ahero eh : oHeros.values()) {
+				if (eh.mcell != null && eh.mcell.getColumn() != -1)
+					if (myp.distxy(eh.myp) <= bb.getRange()) {
+						// here too TODO
+						// v = bestTarget(bb);
+						v = eh.myp;
+						actionList.add(new Action(this, bb, v));
+						break;
+					}
+			}
+		// }
+//		if (v != null)
+//			usedAP += bb.getAPCost();
 
 	}
 
