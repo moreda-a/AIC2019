@@ -8,7 +8,20 @@ public class PickHandler extends Util {
 		// world.pickHero(HeroName.values()[world.getCurrentTurn()]);
 		// b3s1();
 		// b4();
-		b2s2();
+		// b2s2();
+		g4();
+	}
+
+	private static void g4() {
+		if (turn == 0)
+			nextHero = HeroName.GUARDIAN;
+		else if (turn == 1)
+			nextHero = HeroName.GUARDIAN;
+		else if (turn == 2)
+			nextHero = HeroName.GUARDIAN;
+		else if (turn == 3)
+			nextHero = HeroName.GUARDIAN;
+		addHero();
 	}
 
 	@SuppressWarnings("unused")

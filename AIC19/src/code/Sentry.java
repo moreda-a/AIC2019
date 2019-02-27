@@ -34,6 +34,16 @@ public class Sentry extends Ahero {
 		// attack = mhero.getAbility(AbilityName.SENTRY_ATTACK);
 	}
 
+	// DoNothing(some reason)
+	// MoveBackToSafty
+	// MoveForwardForShot
+	// MoveForwardForObejctive
+
+	// safe?
+	// good for shot
+	// ap cost
+	// ap!!!
+
 	@Override
 	public void moveTurn() {
 		System.out.println("Sentry: " + mid + " - " + mhp);
