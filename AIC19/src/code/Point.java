@@ -8,7 +8,7 @@ public class Point {
 	public boolean isWall;
 	public boolean inMyRespawnZone;
 	public boolean inOppRespawnZone;
-	public boolean inObjectiveZone;
+	public boolean isInObjectiveZone;
 
 	public boolean isInVisionGG;
 	public boolean ifull = false;
@@ -61,7 +61,7 @@ public class Point {
 		this.isWall = cell.isWall();
 		this.inMyRespawnZone = cell.isInMyRespawnZone();
 		this.inOppRespawnZone = cell.isInOppRespawnZone();
-		this.inObjectiveZone = cell.isInObjectiveZone();
+		this.isInObjectiveZone = cell.isInObjectiveZone();
 	}
 
 	public void setIFull(boolean full) {

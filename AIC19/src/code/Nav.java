@@ -91,7 +91,7 @@ public class Nav extends Util {
 				if (ie != null && !parent.containsKey(ie) && !ie.isWall && !ie.ifull) {
 					que.add(ie);
 					parent.put(ie, it);
-					if (ie.inObjectiveZone == true) {
+					if (ie.isInObjectiveZone == true) {
 						ic = ie;
 						while (parent.get(ic) != null) {
 							path.push(ic);
@@ -123,7 +123,7 @@ public class Nav extends Util {
 				if (ie != null && !parent.containsKey(ie) && !ie.isWall && (!ie.ifull || start != it)) {
 					que.add(ie);
 					parent.put(ie, it);
-					if (ie.inObjectiveZone == true) {
+					if (ie.isInObjectiveZone == true) {
 						ic = ie;
 						while (parent.get(ic) != null) {
 							path.push(ic);

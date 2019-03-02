@@ -111,7 +111,7 @@ public class Sentry extends Ahero {
 				} else {
 					// System.out.println("shit");
 					// go to objective zone
-					if (!myp.inObjectiveZone)
+					if (!myp.isInObjectiveZone)
 						mainPath = Nav.bfsToObjective2(myp);
 					if (mainPath != null && mainPath.size() != 0) {
 						if (realAP() >= moveCost) {

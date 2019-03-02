@@ -128,7 +128,7 @@ public class Guardian extends Ahero {
 			Point pp = minDisEnemy(po);
 			dd = dis[v(po)][v(pp)];
 		} else {
-			if (!po.inObjectiveZone) {
+			if (!po.isInObjectiveZone) {
 				Stack<Point> path = Nav.bfsToObjective2(po);
 				if (path != null && path.size() != 0) {
 					Point pp = path.firstElement();

@@ -10,7 +10,7 @@ public class Healer extends Ahero {
 
 	@Override
 	public void update() {
-		// TODO Auto-generated method stub
+		updateHero();
 
 	}
 
@@ -23,7 +23,7 @@ public class Healer extends Ahero {
 	@Override
 	public void actionTurn() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override

@@ -90,14 +90,20 @@ public class Blaster extends Ahero {
 	private Point chooseBestMove() {
 		Point bp = null;
 		double maxx = -100000;// set max to no move TODO
-		boolean v = false;
+		boolean v = false, vt = false;
 		for (Direction1 dir : Direction1.values()) {
 			Point po = myp.dir1To(dir);
 			if (po != null && !po.isWall && po.ifull)
 				v = true;
+			if (po.isWall)
+				vt = true;
 		}
 		if (!v) {
 			maxx = evaluate(myp);
+			if (vt && !myp.isInObjectiveZone) {
+				maxx -= 0.05;
+			}
+			// not lock by wall
 			System.out.println(maxx);
 		}
 		if (w2)
@@ -149,7 +155,7 @@ public class Blaster extends Ahero {
 
 			dd += (double) ordis[v(po)] * 0.06;
 		} else {
-			dd += (double) obdis[v(po)] / 10;
+			dd += (double) obdis[v(po)] * 0.1;
 			if (mrealAP() < cost1 + mcc && canFight1) {
 				dd += 15;
 			}
@@ -365,7 +371,6 @@ public class Blaster extends Ahero {
 		return damage;
 	}
 
-	@SuppressWarnings("unused")
 	private int canEnemyDamageOnPoint(Point po) {
 		int damage = 0;
 		// just Guardian
@@ -457,7 +462,6 @@ public class Blaster extends Ahero {
 			btarget = null;
 			return;
 		}
-		actionList.add(new Action());
 		Point v = null;
 		// System.out.println("hi " + AP + " - " + bb.getRemCooldown());
 		if (a3.getRemCooldown() == 0 && a3.getAPCost() <= realAP())
@@ -480,6 +484,13 @@ public class Blaster extends Ahero {
 						break;
 					}
 			}
+		if (mresAP == 0 && mAP >= cost2 && isReady2 && realAP() >= cost2 && actionList.size() == 0) {
+			oneJump();
+			if (btarget != null)
+				actionList.add(new Action(this, a2, btarget));
+			btarget = null;
+		} else
+			actionList.add(new Action());
 		// }
 
 //		if (v != null)
@@ -487,6 +498,26 @@ public class Blaster extends Ahero {
 //
 //		if (AP != world.getAP())
 //			System.out.println("-------------JESUS------------");// sad no jesus here
+	}
+
+	private void oneJump() {
+		double maxx = minInt;
+		Point bp = null;
+		maxx = evaluate(myp);
+		if (isReady2 && realAP() >= cost2) {
+			for (int dx = -4; dx <= +4; ++dx)
+				for (int dy = -(4 - Math.abs(dx)); dy <= 4 - Math.abs(dx); ++dy) {
+					if (isInMap(myp.x + dx, myp.y + dy) && !p[myp.x + dx][myp.y + dy].isWall
+							&& !p[myp.x + dx][myp.y + dy].ifull) {
+						double ev = evaluate(p[myp.x + dx][myp.y + dy]);
+						if (ev > maxx) {
+							ev = maxx;
+							bp = p[myp.x + dx][myp.y + dy];
+						}
+					}
+				}
+		}
+		btarget = bp;
 	}
 
 	// a1 blaster issue khati :D
@@ -522,7 +553,7 @@ public class Blaster extends Ahero {
 	@Override
 	public Point getNewDodge() {
 		if (seenO.size() == 0) {
-			if (!myp.inObjectiveZone) {
+			if (!myp.isInObjectiveZone) {
 				mainPath = Nav.bfsToObjective2(myp);
 			}
 			ntarget = mainPath.firstElement();

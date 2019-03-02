@@ -70,12 +70,15 @@ public class ActionHandler extends Util {
 		double damage = 0;
 		int app = 0;
 		int cdr = 0;
+		int dod = 0;
 		for (Action ac : turnAction) {
 			if (ac.isNothing)
 				continue;
 			app += ac.ability.getAPCost();
-			if (ac.ability.getType() == AbilityType.DODGE)
+			if (ac.ability.getType() == AbilityType.DODGE) {
+				++dod;
 				continue;
+			}
 			if (ac.ability.getType() == AbilityType.OFFENSIVE) {
 				actionDamgePredict(ac);
 				if (ac.ability.getCooldown() != 1)
@@ -89,7 +92,7 @@ public class ActionHandler extends Util {
 			hero.potDamage = 0;
 		}
 		if (app <= AP)
-			return damage - (double) cdr * 0.01;
+			return damage - (double) cdr * 0.01 + (double) dod * 0.1;
 		return 0;
 
 	}
