@@ -9,7 +9,12 @@ import client.model.*;
 public class Util extends Constants {
 	// static class
 
+	public Integer maxInt = Integer.MAX_VALUE;
+	public Integer minInt = Integer.MIN_VALUE;
+
 	public static int[][] dis;
+	public static int[] obdis;
+	public static int[] ordis;
 	public static Point[][] p;
 	public static Point pm1;
 
@@ -24,11 +29,18 @@ public class Util extends Constants {
 	public static ArrayList<Point> ofulls = new ArrayList<Point>();
 
 	public static ArrayList<Ahero> seenO;
+	public static ArrayList<Ahero> seenOB;
+	public static ArrayList<Ahero> seenOG;
+	public static ArrayList<Ahero> seenOS;
+	public static ArrayList<Ahero> seenOH;
 
 	public static HashMap<Pair<Integer, Integer>, Direction> dirs = new HashMap<Pair<Integer, Integer>, Direction>();
 
 	public static int usedAP;
 	public static int resAP;
+
+	public static ArrayList<Point> objectiveZone;
+	public static ArrayList<Point> oppRespawnZone;
 	// public static Pair<Integer, Integer>[][] pirs;
 
 	public static void init(World world) {
@@ -46,8 +58,21 @@ public class Util extends Constants {
 		for (int i = 0; i < 4; ++i) {
 			dirs.put(new Pair<Integer, Integer>(dx1[i], dy1[i]), Direction.values()[i]);
 		}
+		objectiveZone = new ArrayList<Point>();
+		for (Cell c : world.getMap().getObjectiveZone()) {
+			objectiveZone.add(cellToPoint(c));
+		}
+		oppRespawnZone = new ArrayList<Point>();
+		for (Cell c : world.getMap().getOppRespawnZone()) {
+			oppRespawnZone.add(cellToPoint(c));
+		}
 		dis = new int[size][size];
 		Nav.allPairShortestPath();
+
+		obdis = new int[size];
+		ordis = new int[size];
+		Nav.obdisBFS();
+		Nav.ordisBFS();
 	}
 
 	public static void update(World world) {

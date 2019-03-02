@@ -7,11 +7,26 @@ public class PickHandler extends Util {
 	public static void doTurn() {
 		// world.pickHero(HeroName.values()[world.getCurrentTurn()]);
 		// b3s1();
-		// b4();
+		b4();
+		// h4();
 		// b2s2();
-		g4();
+		// g4();
 	}
 
+	@SuppressWarnings("unused")
+	private static void h4() {
+		if (turn == 0)
+			nextHero = HeroName.HEALER;
+		else if (turn == 1)
+			nextHero = HeroName.HEALER;
+		else if (turn == 2)
+			nextHero = HeroName.HEALER;
+		else if (turn == 3)
+			nextHero = HeroName.HEALER;
+		addHero();
+	}
+
+	@SuppressWarnings("unused")
 	private static void g4() {
 		if (turn == 0)
 			nextHero = HeroName.GUARDIAN;

@@ -175,4 +175,72 @@ public class Nav extends Util {
 		return dd;
 
 	}
+
+	public static void obdisBFS() {
+		// end point not full
+		// hero == wall
+		// bfs order for search E = 4 * 961
+		// System.out.println(start + " - " + end);
+		Point it, ie, ic;
+		// Stack<Point> path = new Stack<Point>();
+		HashMap<Point, Point> parent = new HashMap<Point, Point>();
+		// can be faster by parent-> array
+		Queue<Point> que = new LinkedList<Point>();
+		int[] dd = new int[size];
+		Arrays.fill(dd, -1);
+
+		for (Point po : objectiveZone) {
+			que.add(po);
+			parent.put(po, null);
+			dd[v(po)] = 0;
+		}
+
+		while (!que.isEmpty()) {
+			it = que.poll();
+			for (Direction1 dir : Direction1.values()) {
+				ie = it.dir1To(dir);
+				if (ie != null && !parent.containsKey(ie) && !ie.isWall) {
+					que.add(ie);
+					parent.put(ie, it);
+					dd[v(ie)] = dd[v(it)] + 1;
+				}
+			}
+		}
+
+		obdis = dd;
+	}
+
+	public static void ordisBFS() {
+		// end point not full
+		// hero == wall
+		// bfs order for search E = 4 * 961
+		// System.out.println(start + " - " + end);
+		Point it, ie, ic;
+		// Stack<Point> path = new Stack<Point>();
+		HashMap<Point, Point> parent = new HashMap<Point, Point>();
+		// can be faster by parent-> array
+		Queue<Point> que = new LinkedList<Point>();
+		int[] dd = new int[size];
+		Arrays.fill(dd, -1);
+
+		for (Point po : oppRespawnZone) {
+			que.add(po);
+			parent.put(po, null);
+			dd[v(po)] = 0;
+		}
+
+		while (!que.isEmpty()) {
+			it = que.poll();
+			for (Direction1 dir : Direction1.values()) {
+				ie = it.dir1To(dir);
+				if (ie != null && !parent.containsKey(ie) && !ie.isWall) {
+					que.add(ie);
+					parent.put(ie, it);
+					dd[v(ie)] = dd[v(it)] + 1;
+				}
+			}
+		}
+
+		ordis = dd;
+	}
 }

@@ -16,6 +16,14 @@ public class Guardian extends Ahero {
 	public boolean isInDanger;
 	public boolean canRunAway;
 	public boolean canFight;
+
+	public boolean w1;
+	public boolean w2;
+	public boolean w3;
+	public Point otarget;
+	public Point ntarget;
+	public Point btarget = null;
+
 	public int mresAP;
 
 	public Guardian(Hero h) {
@@ -48,7 +56,18 @@ public class Guardian extends Ahero {
 	public void moveTurn() {
 		System.out.println("Guardian: " + mid + " - " + mhp);
 		if (phase == 0) {
+			btarget = null;
+			w1 = false;
+			w2 = false;
+			w3 = false;
 			mresAP = 0;
+			Point bp = isJumpGood();
+			if (bp != null) {
+				w2 = true;
+				resAP += cost2;
+				mresAP += cost2;
+				btarget = bp;
+			}
 		}
 		mainPath = null;
 		// process
@@ -58,6 +77,30 @@ public class Guardian extends Ahero {
 		if (mde != null)
 			mded = dis[v(myp)][v(mde)];// dis or distxy?
 
+		Point bp = chooseBestMove();
+
+		if (bp != null) {
+			if (moveCost <= realAP() && moveCost <= maxAP / 4 - mresAP && isGoodToMove(mde, mded)) {
+				moveHero(this, bp);
+				usedAP += moveCost;
+				mresAP += moveCost;
+			}
+		}
+	}
+
+	private Point isJumpGood() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	private boolean isGoodToMove(Point mde, int mded) {
+		// {(6 - phase < mded - 2) || mded > 2 || mresAP <= 10 - 8)&& mresAP <= 25 - 8)
+		// || (Math.min(6 - phase, mded - 2) * moveCost > realAP())
+		// give AP or too far ,no enemy ,enemy to far don't save ,have AP for attack
+		return (mde == null || mded > 2 || mresAP <= 10 - 8);
+	}
+
+	private Point chooseBestMove() {
 		Point bp = null;
 		int maxx = -100000;// set max to no move
 		for (Direction1 dir : Direction1.values()) {
@@ -74,16 +117,7 @@ public class Guardian extends Ahero {
 				}
 			}
 		}
-		if (bp != null) {
-			if (realAP() >= moveCost && (mde == null || mded > 2 || mresAP <= 10 - 8) && mresAP <= 25 - 8) {
-				// {(6 - phase < mded - 2) || mded > 2 || mresAP <= 10 - 8)&& mresAP <= 25 - 8)
-				// || (Math.min(6 - phase, mded - 2) * moveCost > realAP())
-				// give AP or too far ,no enemy ,enemy to far don't save ,have AP for attack
-				moveHero(this, bp);
-				usedAP += moveCost;
-				mresAP += moveCost;
-			}
-		}
+		return bp;
 	}
 
 //what if give all to one guradian ? 

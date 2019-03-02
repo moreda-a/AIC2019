@@ -3,6 +3,27 @@ package code;
 public class Movement extends Util {
 
 	public static void doTurn() {
+		if (phase == 0) {
+			int k = 0;
+			int maxForRes = 0, minForRes = 0;
+			for (Ahero hero : mHeros.values()) {
+				if (hero.isDead)
+					continue;
+				k++;
+				if (hero.isReady3)
+					maxForRes += hero.cost3;
+				else if (hero.isReady1)
+					maxForRes += hero.cost1;
+				minForRes += hero.cost1;
+			}
+			if (k != 0)
+				for (Ahero hero : mHeros.values()) {
+					if (hero.isDead)
+						continue;
+					hero.mAP = maxAP / k;// or AP
+				}
+		}
+
 		for (Ahero hero : mHeros.values()) {
 			if (hero.isDead)
 				continue;

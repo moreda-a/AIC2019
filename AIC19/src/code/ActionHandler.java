@@ -25,7 +25,8 @@ public class ActionHandler extends Util {
 		index[1] = 0;
 		index[2] = 0;
 		index[3] = 0;
-		int c = 0, cta, maxx = -1;
+		double cta, maxx = -1;
+		int c = 0;
 		int alpha = 0;
 		ArrayList<Action> bestTurnAction = null;
 		while (c == 0) {
@@ -64,10 +65,11 @@ public class ActionHandler extends Util {
 
 	}
 
-	private static int checkTurnAction(ArrayList<Action> turnAction) {
+	private static double checkTurnAction(ArrayList<Action> turnAction) {
 		// simple damage dealt
-		int damage = 0;
+		double damage = 0;
 		int app = 0;
+		int cdr = 0;
 		for (Action ac : turnAction) {
 			if (ac.isNothing)
 				continue;
@@ -76,6 +78,8 @@ public class ActionHandler extends Util {
 				continue;
 			if (ac.ability.getType() == AbilityType.OFFENSIVE) {
 				actionDamgePredict(ac);
+				if (ac.ability.getCooldown() != 1)
+					++cdr;
 			}
 		}
 		for (Ahero hero : oHeros.values()) {
@@ -85,7 +89,7 @@ public class ActionHandler extends Util {
 			hero.potDamage = 0;
 		}
 		if (app <= AP)
-			return damage;
+			return damage - (double) cdr * 0.01;
 		return 0;
 
 	}

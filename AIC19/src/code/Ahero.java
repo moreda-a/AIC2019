@@ -64,6 +64,9 @@ public abstract class Ahero extends Util {// ahero = hero
 	public boolean isLobbing3;
 	public ArrayList<Action> actionList = new ArrayList<Action>();
 
+	public int mAP;
+	public int mresAP;
+
 	public Ahero(Hero h) {
 		this.mhero = h;
 		Cell mcell = mhero.getCurrentCell();
@@ -144,4 +147,8 @@ public abstract class Ahero extends Util {// ahero = hero
 	public abstract void actionTurn();
 
 	public abstract Point getNewDodge();
+
+	public int mrealAP() {
+		return mAP - mresAP;
+	}
 }
