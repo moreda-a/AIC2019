@@ -86,13 +86,24 @@ public class ActionHandler extends Util {
 			}
 		}
 		for (Ahero hero : oHeros.values()) {
-			if (!hero.isInVision)
+			if (hero.isDead || !hero.isInVision)
 				continue;
 			damage += Math.min(hero.mhp, hero.potDamage);
+
+			if (hero.type == HeroName.SENTRY)
+				damage += 0.004;
+			else if (hero.type == HeroName.HEALER)
+				damage += 0.003;
+			else if (hero.type == HeroName.BLASTER)
+				damage += 0.002;
+			else if (hero.type == HeroName.GUARDIAN)
+				damage += 0.001;
+
+			damage -= (double) hero.mhp * 0.001;
 			hero.potDamage = 0;
 		}
 		if (app <= AP)
-			return damage - (double) cdr * 0.01 + (double) dod * 0.1;
+			return damage - (double) cdr * 0.2 + (double) dod * 0.7;
 		return 0;
 
 	}

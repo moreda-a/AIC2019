@@ -19,7 +19,7 @@ public class Manage extends Util {
 	public static void moveTurn(World world) {
 		startTime = System.currentTimeMillis();
 		update(world);
-		Movement.doTurn();
+		MovementHandler.doTurn();
 		System.out.println("This move turn time in client : " + (System.currentTimeMillis() - startTime));
 	}
 

@@ -1,6 +1,6 @@
 package code;
 
-public class Movement extends Util {
+public class MovementHandler extends Util {
 
 	public static void doTurn() {
 		if (phase == 0) {

@@ -61,7 +61,8 @@ public class Guardian extends Ahero {
 			w2 = false;
 			w3 = false;
 			mresAP = 0;
-			Point bp = isJumpGood();
+			// hello :D
+			Point bp = isItGoodToJump();
 			if (bp != null) {
 				w2 = true;
 				resAP += cost2;
@@ -80,7 +81,7 @@ public class Guardian extends Ahero {
 		Point bp = chooseBestMove();
 
 		if (bp != null) {
-			if (moveCost <= realAP() && moveCost <= maxAP / 4 - mresAP && isGoodToMove(mde, mded)) {
+			if (moveCost <= realAP() && moveCost <= mAP - mresAP && isGoodToMove(mde, mded)) {
 				moveHero(this, bp);
 				usedAP += moveCost;
 				mresAP += moveCost;
@@ -88,8 +89,28 @@ public class Guardian extends Ahero {
 		}
 	}
 
-	private Point isJumpGood() {
-		// TODO Auto-generated method stub
+	private Point isItGoodToJump() {
+		int minn = 100000;
+		Point bp = null;
+		if (isReady2 && realAP() >= cost2) {
+			for (int dx = -range2; dx <= +range2; ++dx)
+				for (int dy = -(range2 - Math.abs(dx)); dy <= range2 - Math.abs(dx); ++dy) {
+					if (isInMap(myp.x + dx, myp.y + dy) && !p[myp.x + dx][myp.y + dy].isWall
+							&& !p[myp.x + dx][myp.y + dy].ifull) {
+						if (obdis[v(myp.x + dx, myp.y + dy)] != -1 && obdis[v(myp.x + dx, myp.y + dy)] < minn) {
+							minn = obdis[v(myp.x + dx, myp.y + dy)];
+							bp = p[myp.x + dx][myp.y + dy];
+						}
+					}
+				}
+			if (minn < obdis[v(myp)] - 6) {
+				return bp;
+				// btarget = bp;
+				// w2 = true;
+				// resAP += cost2;
+				// mresAP += cost2;
+			}
+		}
 		return null;
 	}
 
@@ -194,6 +215,11 @@ public class Guardian extends Ahero {
 	@Override
 	public void actionTurn() {
 		actionList = new ArrayList<Action>();
+		if (btarget != null && realAP() >= cost2) {
+			actionList.add(new Action(this, a2, btarget));
+			btarget = null;
+			return;
+		}
 		actionList.add(new Action());
 		Point v = null;
 		if (rcd1 == 0 && cost1 <= realAP()) {

@@ -39,7 +39,6 @@ public class Blaster extends Ahero {
 			w2 = false;
 			w3 = false;
 			mresAP = 0;
-			mAP = maxAP / 4;
 			// hello :D
 			Point bp = isItGoodToJump();
 			if (bp != null) {
