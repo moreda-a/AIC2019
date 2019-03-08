@@ -17,9 +17,6 @@ public class Guardian extends Ahero {
 	public boolean canRunAway;
 	public boolean canFight;
 
-	public boolean w1;
-	public boolean w2;
-	public boolean w3;
 	public Point otarget;
 	public Point ntarget;
 	public Point btarget = null;
@@ -103,7 +100,7 @@ public class Guardian extends Ahero {
 						}
 					}
 				}
-			if (minn < obdis[v(myp)] - 6) {
+			if (minn < obdis[v(myp)] - mAP / moveCost) {
 				return bp;
 				// btarget = bp;
 				// w2 = true;

@@ -24,6 +24,10 @@ public class Util extends Constants {
 
 	public static HashMap<Integer, Ahero> mHeros = new HashMap<Integer, Ahero>();
 	public static HashMap<Integer, Ahero> oHeros = new HashMap<Integer, Ahero>();
+	public static HashMap<Integer, Ahero> mlHeros = new HashMap<Integer, Ahero>();
+	public static HashMap<Integer, Ahero> olHeros = new HashMap<Integer, Ahero>();
+	public static HashMap<Integer, Ahero> msHeros = new HashMap<Integer, Ahero>();
+	public static HashMap<Integer, Ahero> osHeros = new HashMap<Integer, Ahero>();
 
 	public static ArrayList<Point> mfulls = new ArrayList<Point>();
 	public static ArrayList<Point> ofulls = new ArrayList<Point>();
@@ -111,6 +115,27 @@ public class Util extends Constants {
 				hero.update();
 			for (Ahero hero : oHeros.values())
 				hero.update();
+
+			mlHeros = new HashMap<Integer, Ahero>();
+			olHeros = new HashMap<Integer, Ahero>();
+			msHeros = new HashMap<Integer, Ahero>();
+			osHeros = new HashMap<Integer, Ahero>();
+
+			for (Ahero hero : mHeros.values()) {
+				if (!hero.isDead) {
+					mlHeros.put(hero.mid, hero);
+					if (hero.isInVision)
+						msHeros.put(hero.mid, hero);
+				}
+			}
+
+			for (Ahero hero : oHeros.values()) {
+				if (!hero.isDead) {
+					olHeros.put(hero.mid, hero);
+					if (hero.isInVision)
+						osHeros.put(hero.mid, hero);
+				}
+			}
 
 			for (Point po : mfulls) {
 				po.setIFull(false);

@@ -6,22 +6,13 @@ import client.model.*;
 
 // what if i was dead ? hello ? :((( i am deadddddd :D
 public class Blaster extends Ahero {
-	public boolean isInDanger;
 	public boolean canRunAway;
-	public boolean canFight1;
-	public boolean canFight3;
-	public boolean w1;
-	public boolean w2;
-	public boolean w3;
 	public Point otarget;
 	public Point ntarget;
-	public Point btarget = null;
+	private String btfk;
 
 	public Blaster(Hero h) {
 		super(h);
-		w1 = false;
-		w2 = false;
-		w3 = false;
 	}
 
 	@Override
@@ -33,25 +24,33 @@ public class Blaster extends Ahero {
 	public void moveTurn() {
 		System.out.println("Blaster: " + mid + " - " + mhp + " - " + myp);
 
-		if (phase == 0) {
-			btarget = null;
-			w1 = false;
-			w2 = false;
-			w3 = false;
-			mresAP = 0;
-			// hello :D
-			Point bp = isItGoodToJump();
-			if (bp != null) {
-				w2 = true;
-				resAP += cost2;
-				mresAP += cost2;
-				btarget = bp;
-			}
-		}
+		if (phase == 0)
+			initMoveTurn();
 
 		stateCheck();
 
 		Point bp = chooseBestMove();
+		tryToMoveTo(bp);
+
+	}
+
+	private void initMoveTurn() {
+		jumpTarget = null;
+		w1 = false;
+		w2 = false;
+		w3 = false;
+		mresAP = 0;
+		// hello :D
+		Point bp = isItGoodToJump();
+		if (bp != null) {
+			w2 = true;
+			resAP += cost2;
+			mresAP += cost2;
+			jumpTarget = bp;
+		}
+	}
+
+	private void tryToMoveTo(Point bp) {
 		if (bp != null) {
 			if (moveCost <= realAP()) {
 				moveHero(this, bp);
@@ -65,8 +64,8 @@ public class Blaster extends Ahero {
 		int minn = 100000;
 		Point bp = null;
 		if (isReady2 && realAP() >= cost2) {
-			for (int dx = -4; dx <= +4; ++dx)
-				for (int dy = -(4 - Math.abs(dx)); dy <= 4 - Math.abs(dx); ++dy) {
+			for (int dx = -range2; dx <= +range2; ++dx)
+				for (int dy = -(range2 - Math.abs(dx)); dy <= range2 - Math.abs(dx); ++dy) {
 					if (isInMap(myp.x + dx, myp.y + dy) && !p[myp.x + dx][myp.y + dy].isWall
 							&& !p[myp.x + dx][myp.y + dy].ifull) {
 						if (obdis[v(myp.x + dx, myp.y + dy)] != -1 && obdis[v(myp.x + dx, myp.y + dy)] < minn) {
@@ -75,7 +74,7 @@ public class Blaster extends Ahero {
 						}
 					}
 				}
-			if (minn < obdis[v(myp)] - 6) {
+			if (minn < obdis[v(myp)] - mAP / moveCost) {
 				return bp;
 				// btarget = bp;
 				// w2 = true;
@@ -155,7 +154,7 @@ public class Blaster extends Ahero {
 			dd += (double) ordis[v(po)] * 0.06;
 		} else {
 			dd += (double) obdis[v(po)] * 0.1;
-			if (mrealAP() < cost1 + mcc && canFight1) {
+			if (mrealAP() < cost1 + mcc && can1) {
 				dd += 15;
 			}
 			// back line idea for not getting stalk at least one level stalk
@@ -416,11 +415,9 @@ public class Blaster extends Ahero {
 		seenOH = new ArrayList<Ahero>();
 		seenOG = new ArrayList<Ahero>();
 		isInDanger = false;
-		canFight1 = false;
-		canFight3 = false;
-		for (Ahero hero : oHeros.values()) {
-			if (!isInVision(hero.myp))
-				continue;
+		can1 = false;
+		can3 = false;
+		for (Ahero hero : osHeros.values()) {
 			seenO.add(hero);
 			if (hero.type == HeroName.BLASTER)
 				seenOB.add(hero);
@@ -446,9 +443,9 @@ public class Blaster extends Ahero {
 
 		// isReady1 == true
 		if (seenA1.size() != 0 && isReady1 && (realAP() >= cost1))
-			canFight1 = true;
+			can1 = true;
 		if (seenA3.size() != 0 && isReady3 && (realAP() >= cost3))
-			canFight3 = true;
+			can3 = true;
 		// System.out.println(isReady3);
 
 	}
@@ -456,38 +453,68 @@ public class Blaster extends Ahero {
 	@Override
 	public void actionTurn() {
 		actionList = new ArrayList<Action>();
-		if (btarget != null && realAP() >= cost2) {
-			actionList.add(new Action(this, a2, btarget));
-			btarget = null;
+		if (jumpTarget != null && realAP() >= cost2) {
+			actionList.add(new Action(this, a2, jumpTarget));
+			jumpTarget = null;
 			return;
 		}
 		Point v = null;
+		HashSet<String> hs = new HashSet<String>();
 		// System.out.println("hi " + AP + " - " + bb.getRemCooldown());
-		if (a3.getRemCooldown() == 0 && a3.getAPCost() <= realAP())
-			for (Ahero eh : oHeros.values()) {
+		if (rcd3 == 0 && cost3 <= realAP())
+			for (Ahero eh : osHeros.values()) {
 				// System.out.println(eh.getCurrentCell());
-				if (eh.isInVision)
-					if (myp.distxy(eh.myp) <= range3 + aoe3) {
-						v = bestTarget(a3);
+				if (myp.distxy(eh.myp) <= range3 + aoe3) {
+					v = bestTargetFK(a3, eh);
+					if (v == null)
+						continue;
+					boolean vvb = true;
+					for (String str : hs) {
+						boolean vb = false;
+						for (int i = 0; i < 4; ++i) {
+							if (str.charAt(i) < btfk.charAt(i))
+								vb = true;
+						}
+						if (!vb)
+							vvb = false;
+					}
+					if (vvb) {
+						hs.add(btfk);
 						actionList.add(new Action(this, a3, v));
-						break;
-					}
+					} // break;
+				}
 			}
+		System.out.println(actionList.size());
 		// if (v == null) {
-		if (a1.getRemCooldown() == 0 && a1.getAPCost() <= realAP())
-			for (Ahero eh : oHeros.values()) {
-				if (eh.isInVision)
-					if (myp.distxy(eh.myp) <= range1 + aoe1) {
-						v = bestTarget(a1);
-						actionList.add(new Action(this, a1, v));
-						break;
+		hs = new HashSet<String>();
+		if (rcd1 == 0 && cost1 <= realAP())
+			for (Ahero eh : osHeros.values()) {
+				if (myp.distxy(eh.myp) <= range1 + aoe1) {
+					v = bestTargetFK(a1, eh);
+					if (v == null)
+						continue;
+					boolean vvb = true;
+					for (String str : hs) {
+						boolean vb = false;
+						for (int i = 0; i < 4; ++i) {
+							if (str.charAt(i) < btfk.charAt(i))
+								vb = true;
+						}
+						if (!vb)
+							vvb = false;
 					}
+					if (vvb) {
+						hs.add(btfk);
+						actionList.add(new Action(this, a1, v));
+					} // break;
+				}
 			}
+		System.out.println(actionList.size());
 		if (mresAP == 0 && mAP >= cost2 && isReady2 && realAP() >= cost2 && actionList.size() == 0) {
 			oneJump();
-			if (btarget != null)
-				actionList.add(new Action(this, a2, btarget));
-			btarget = null;
+			if (jumpTarget != null)
+				actionList.add(new Action(this, a2, jumpTarget));
+			jumpTarget = null;
 		} else
 			actionList.add(new Action());
 		// }
@@ -497,6 +524,50 @@ public class Blaster extends Ahero {
 //
 //		if (AP != world.getAP())
 //			System.out.println("-------------JESUS------------");// sad no jesus here
+	}
+
+	private Point bestTargetFK(Ability ab, Ahero eh) {
+		int mx = -1;
+		Point be = null;
+		for (int dx = -ab.getRange(); dx <= ab.getRange(); ++dx) {
+			for (int dy = -(ab.getRange() - Math.abs(dx)); dy <= (ab.getRange() - Math.abs(dx)); ++dy) {
+				if (!isInMap(myp.x + dx, myp.y + dy) || (!ab.isLobbing() && cellToPoint(world.getImpactCell(ab,
+						pointToCell(myp), pointToCell(p[myp.x + dx][myp.y + dy]))) != p[myp.x + dx][myp.y + dy]))
+//				 !world.isInVision(mhero.getCurrentCell(), world.getMap().getCell(myp.y + dy, myp.x + dx))
+					continue;
+				if (p[myp.x + dx][myp.y + dy].distxy(eh.myp) > ab.getAreaOfEffect())
+					continue;
+				int k = 0;
+				for (int tx = -ab.getAreaOfEffect(); tx <= ab.getAreaOfEffect(); ++tx) {
+					for (int ty = -(ab.getAreaOfEffect() - Math.abs(tx)); ty <= (ab.getAreaOfEffect()
+							- Math.abs(tx)); ++ty) {
+						if (!isInMap(myp.x + dx + tx, myp.y + dy + ty))
+							continue;
+						if (p[myp.x + dx + tx][myp.y + dy + ty].ofull)
+							++k;
+					}
+				}
+				if (k > mx) {
+					be = p[myp.x + dx][myp.y + dy];
+					mx = k;
+				}
+			}
+		}
+		if (be != null) {
+			btfk = "";
+			for (Ahero hero : oHeros.values()) {
+				if (hero.isDead || !hero.isInVision) {
+					btfk = btfk + '0';
+					continue;
+				}
+				if (be.distxy(hero.myp) <= ab.getAreaOfEffect())
+					btfk = btfk + '1';
+				else
+					btfk = btfk + '0';
+			}
+			System.out.println(mx + " -x- " + btfk + " - " + be);
+		}
+		return be;
 	}
 
 	private void oneJump() {
@@ -516,7 +587,7 @@ public class Blaster extends Ahero {
 					}
 				}
 		}
-		btarget = bp;
+		jumpTarget = bp;
 	}
 
 	// a1 blaster issue khati :D

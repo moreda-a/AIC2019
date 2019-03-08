@@ -10,17 +10,28 @@ public abstract class Ahero extends Util {// ahero = hero
 	// private Cell mcell;
 	public boolean moved;
 
+	public boolean w1;
+	public boolean w2;
+	public boolean w3;
+	public Point jumpTarget = null;
+	public boolean isInDanger;
+	public boolean canFight;
+	public boolean can1;
+	public boolean can3;
+
 	public Point myp;
 	public int mid;
 	public HeroName type;
 	public boolean isDead;
 	public boolean isInVision;
 	public int mhp;
+	public int maxHP;
 	public int mrrt;
 	public int moveCost;
 	public Stack<Point> mainPath;
 
 	public int potDamage = 0;
+	public int potHeal = 0;
 
 	public ArrayList<Ahero> seenO = new ArrayList<Ahero>();
 	public ArrayList<Ahero> seenA1 = new ArrayList<Ahero>();
@@ -99,6 +110,8 @@ public abstract class Ahero extends Util {// ahero = hero
 		isLobbing1 = a1.isLobbing();
 		isLobbing2 = a2.isLobbing();
 		isLobbing3 = a3.isLobbing();
+
+		maxHP = mhero.getMaxHP();
 
 		mrrt = mhero.getRemRespawnTime();
 		mhp = mhero.getCurrentHP();
