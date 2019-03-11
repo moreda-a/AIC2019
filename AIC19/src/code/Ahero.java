@@ -6,6 +6,7 @@ import java.util.Stack;
 import client.model.*;
 
 public abstract class Ahero extends Util {// ahero = hero
+	// TODO == double problem /double
 	public Hero mhero;
 	// private Cell mcell;
 	public boolean moved;
@@ -13,7 +14,11 @@ public abstract class Ahero extends Util {// ahero = hero
 	public boolean w1;
 	public boolean w2;
 	public boolean w3;
+	public boolean w22;
+
 	public Point jumpTarget = null;
+	public Point beforeJumpTarget = null;
+
 	public boolean isInDanger;
 	public boolean canFight;
 	public boolean can1;
@@ -74,6 +79,7 @@ public abstract class Ahero extends Util {// ahero = hero
 	public boolean isLobbing2;
 	public boolean isLobbing3;
 	public ArrayList<Action> actionList = new ArrayList<Action>();
+	public ArrayList<Movement> movementList = new ArrayList<Movement>();
 
 	public int mAP;
 	public int mresAP;
@@ -99,10 +105,11 @@ public abstract class Ahero extends Util {// ahero = hero
 		aoe2 = a2.getAreaOfEffect();
 		aoe3 = a3.getAreaOfEffect();
 
-		maxcd1 = a1.getCooldown();
+		maxcd1 = Math.max(1, a1.getCooldown());
 		maxcd2 = a2.getCooldown();
 		maxcd3 = a3.getCooldown();
 
+		// System.out.println(maxcd1 + "-" + maxcd2 + "-" + maxcd3);
 		pow1 = a1.getPower();
 		pow2 = a2.getPower();
 		pow3 = a3.getPower();
@@ -161,7 +168,255 @@ public abstract class Ahero extends Util {// ahero = hero
 
 	public abstract Point getNewDodge();
 
+	public abstract double evaluate(Point target, Point from);
+
 	public int mrealAP() {
 		return mAP - mresAP;
+	}
+
+	protected double myHealFrom(Point po) {
+		double heal = 0;
+		if (type == HeroName.BLASTER) {
+		} else if (type == HeroName.SENTRY) {
+		} else if (type == HeroName.HEALER) {
+			heal = mostHealFrom(po, a3).se / maxcd3;
+		} else if (type == HeroName.GUARDIAN) {
+		}
+		return heal;
+	}
+
+	protected double myTurnHealFrom(Point po) {
+		double heal = 0;
+		if (type == HeroName.BLASTER) {
+		} else if (type == HeroName.SENTRY) {
+		} else if (type == HeroName.HEALER) {
+			if (isReady3)
+				heal = mostHealFrom(po, a3).se;
+		} else if (type == HeroName.GUARDIAN) {
+		}
+		return heal;
+	}
+
+	protected double myDamageFrom(Point po) {
+		double damage = 0;
+		if (type == HeroName.BLASTER) {
+			double d1 = mostDamageFrom(po, a1).se;
+			double d3 = mostDamageFrom(po, a3).se;
+			damage = (double) (Math.max(d1, d3) + (maxcd3 - 1) * d1) / maxcd3;
+		} else if (type == HeroName.SENTRY) {
+			double d1 = mostDamageFrom(po, a1).se;
+			double d3 = mostDamageFrom(po, a3).se;
+			damage = (double) (Math.max(d1, d3) + (maxcd3 - 1) * d1) / maxcd3;
+		} else if (type == HeroName.HEALER) {
+			damage = mostDamageFrom(po, a1).se / maxcd1;
+		} else if (type == HeroName.GUARDIAN) {
+			damage = mostDamageFrom(po, a1).se / maxcd1;
+		}
+		return damage;
+	}
+
+	protected double myTurnDamageFrom(Point po) {
+		double damage = 0;
+		if (type == HeroName.BLASTER) {
+			double d1 = 0, d3 = 0;
+			if (isReady1)
+				d1 = mostDamageFrom(po, a1).se;
+			if (isReady3)
+				d3 = mostDamageFrom(po, a3).se;
+			damage = Math.max(d1, d3);
+		} else if (type == HeroName.SENTRY) {
+			double d1 = 0, d3 = 0;
+			if (isReady1)
+				d1 = mostDamageFrom(po, a1).se;
+			if (isReady3)
+				d3 = mostDamageFrom(po, a3).se;
+			damage = Math.max(d1, d3);
+		} else if (type == HeroName.HEALER) {
+			if (isReady1)
+				damage = mostDamageFrom(po, a1).se;
+		} else if (type == HeroName.GUARDIAN) {
+			if (isReady1)
+				damage = mostDamageFrom(po, a1).se;
+		}
+		return damage;
+	}
+
+	// and him self
+	private Pair<Point, Double> mostHealFrom(Point po, Ability ab) {
+		int mx = 0;
+		Point be = null;
+		// TODO not optimal
+		// TODO not right
+		// only right for bomb and guardian attack (lol what about unseen ? :D
+		for (Ahero hero : mlHeros.values()) {
+			if (hero.myp.distxy(po) <= ab.getRange() + ab.getAreaOfEffect()) {
+				int kx = Math.min(hero.maxHP - hero.mhp, ab.getPower());
+				if (kx > mx) {
+					mx = kx;
+					be = hero.myp;
+				}
+			}
+		}
+		return new Pair<Point, Double>(be, (double) mx);
+	}
+
+	private Pair<Point, Double> mostDamageFrom(Point po, Ability ab) {
+		int mx = 0;
+		Point be = null;
+		// TODO not optimal
+		// TODO not right
+		// only right for bomb and guardian attack (lol what about unseen ? :D
+		for (int dx = -ab.getRange(); dx <= ab.getRange(); ++dx) {
+			for (int dy = -(ab.getRange() - Math.abs(dx)); dy <= (ab.getRange() - Math.abs(dx)); ++dy) {
+				int xx = po.x + dx;
+				int yy = po.y + dy;
+				if (!isInMap(xx, yy) || (!ab.isLobbing()
+						&& cellToPoint(world.getImpactCell(ab, pointToCell(po), pointToCell(p[xx][yy]))) != p[xx][yy]))
+//				 !world.isInVision(mhero.getCurrentCell(), world.getMap().getCell(myp.y + dy, myp.x + dx))
+					continue;
+				int k = 0;
+				for (int tx = -ab.getAreaOfEffect(); tx <= ab.getAreaOfEffect(); ++tx) {
+					for (int ty = -(ab.getAreaOfEffect() - Math.abs(tx)); ty <= (ab.getAreaOfEffect()
+							- Math.abs(tx)); ++ty) {
+						int xxx = xx + tx;
+						int yyy = yy + ty;
+						if (!isInMap(xxx, yyy))
+							continue;
+						if (p[xxx][yyy].ofull)
+							++k;
+					}
+				}
+				if (k > mx) {
+					be = p[xx][yy];
+					mx = k;
+				}
+			}
+		}
+		return new Pair<Point, Double>(be, (double) mx * ab.getPower());
+	}
+
+	protected Point isItGoodToJump(Point po) {
+		int minn = 100000;
+		Point bp = null;
+		// seenO.size ? .|x - .|y
+		if (isReady2 && realAP() >= cost2) {
+			for (int dx = -range2; dx <= +range2; ++dx)
+				for (int dy = -(range2 - Math.abs(dx)); dy <= range2 - Math.abs(dx); ++dy) {
+					if (isInMap(po.x + dx, po.y + dy) && !p[po.x + dx][po.y + dy].isWall
+							&& !p[po.x + dx][po.y + dy].ifull) {
+						if (obdis[v(po.x + dx, po.y + dy)] != -1 && obdis[v(po.x + dx, po.y + dy)] < minn) {
+							minn = obdis[v(po.x + dx, po.y + dy)];
+							bp = p[po.x + dx][po.y + dy];
+						}
+					}
+				}
+			if (minn < obdis[v(po)] - mAP / moveCost) {
+				return bp;
+				// btarget = bp;
+				// w2 = true;
+				// resAP += cost2;
+				// mresAP += cost2;
+			}
+		}
+		return null;
+	}
+
+	protected Point isItGoodToJumpInNextTurn(Point po) {
+		// Dijkstra to objective zone?
+		int minn = 100000;
+		Point bp = null;
+		if (rcd2 <= 1) {
+			for (int dx = -6; dx <= 6; ++dx)
+				for (int dy = -(6 - Math.abs(dx)); dy <= 6 - Math.abs(dx); ++dy) {
+					if (isInMap(po.x + dx, po.y + dy) && !p[po.x + dx][po.y + dy].isWall
+							&& !p[po.x + dx][po.y + dy].ifull) {
+						Point cp = isItGoodToJump(p[po.x + dx][po.y + dy]);// is ready?:/
+						if (cp == null)
+							continue;
+						if (obdis[v(cp)] != -1 && obdis[v(cp)] < minn) {
+							minn = obdis[v(cp)];
+							bp = p[po.x + dx][po.y + dy];
+						}
+					}
+				}
+			if (minn < obdis[v(po)] - 2 * (mAP / moveCost)) {
+				return bp;
+				// btarget = bp;
+				// w2 = true;
+				// resAP += cost2;
+				// mresAP += cost2;
+			}
+		}
+		return null;
+	}
+
+	protected void addBestMoves() {
+		movementList.add(new Movement(this, myp));
+		for (Direction1 dir : Direction1.values()) {
+			Point po = myp.dir1To(dir);
+			if (po != null && !po.isWall && !po.ifull)
+				movementList.add(new Movement(this, po));
+
+		}
+	}
+
+	protected void initMoveTurn() {
+		jumpTarget = null;
+		beforeJumpTarget = null;
+		w1 = false;
+		w2 = false;
+		w3 = false;
+		w22 = false;
+		mresAP = 0;
+		// hello :D
+		Point bp = isItGoodToJump(myp);
+		if (bp != null) {
+			w2 = true;
+			resAP += cost2;
+			mresAP += cost2;
+			jumpTarget = bp;
+		} else {
+			bp = isItGoodToJumpInNextTurn(myp);
+			if (bp != null) {
+				w22 = true;
+				beforeJumpTarget = bp;
+			}
+		}
+	}
+
+	protected void startMoveTurn() {
+		movementList = new ArrayList<Movement>();
+	}
+
+	protected double enemyGuardianDanger(Point po) {
+		int minn = maxInt;
+		double val = 0;
+
+		// just Guardian
+		for (Ahero hero : seenOG) {
+			int fdis = po.distxy(hero.myp);
+			val += Math.max(4 - fdis, 0) * 20;
+			// minn = Math.min(minn, po.distxy(hero.myp));
+
+		}
+		// dis -> - 0 20 40 40 40 ...
+		// hajm damage i ke mikhore to onja hum :D
+		// farz kon yeki
+		// 40 40 40 20 0 0 0
+		// 40 20 0 -20 -40 -40 -40
+		// -> 80 60 40 20 0 0 0
+//		if (minn == maxInt)
+//			return 0;
+//		else if (minn == 0)
+//			return 100;// to much danger
+//		else if (minn == 1)
+//			return 100;
+//		else if (minn == 2)
+//			return 100;
+//		else if (minn == 3)
+//			return 100;
+//		else if (minn > 3)
+//			return 100;
+		return val;
 	}
 }

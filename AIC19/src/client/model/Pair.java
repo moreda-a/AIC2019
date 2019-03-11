@@ -5,20 +5,19 @@ package client.model;
  */
 public class Pair<K, V> {
 
-    private K first;
-    private V second;
+	public K fi;
+	public V se;
 
-    public Pair(K key, V value) {
-        this.first = key;
-        this.second = value;
-    }
+	public Pair(K key, V value) {
+		this.fi = key;
+		this.se = value;
+	}
 
+	public K getFirst() {
+		return fi;
+	}
 
-    public K getFirst() {
-        return first;
-    }
-
-    public V getSecond() {
-        return second;
-    }
+	public V getSecond() {
+		return se;
+	}
 }

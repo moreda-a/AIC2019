@@ -26,28 +26,13 @@ public class Blaster extends Ahero {
 
 		if (phase == 0)
 			initMoveTurn();
+		startMoveTurn();
 
 		stateCheck();
 
-		Point bp = chooseBestMove();
-		tryToMoveTo(bp);
-
-	}
-
-	private void initMoveTurn() {
-		jumpTarget = null;
-		w1 = false;
-		w2 = false;
-		w3 = false;
-		mresAP = 0;
-		// hello :D
-		Point bp = isItGoodToJump();
-		if (bp != null) {
-			w2 = true;
-			resAP += cost2;
-			mresAP += cost2;
-			jumpTarget = bp;
-		}
+		addBestMoves();
+//		Point bp = chooseBestMove();
+//		tryToMoveTo(bp);
 	}
 
 	private void tryToMoveTo(Point bp) {
@@ -97,7 +82,7 @@ public class Blaster extends Ahero {
 				vt = true;
 		}
 		if (!v) {
-			maxx = evaluate(myp);
+			maxx = evaluate(myp, myp);
 			if (vt && !myp.isInObjectiveZone) {
 				maxx -= 0.05;
 			}
@@ -116,7 +101,7 @@ public class Blaster extends Ahero {
 				// do we really need ifull ?
 				// can we calculate all together ?
 				// what about planning ?
-				double ev = evaluate(po);
+				double ev = evaluate(po, myp);
 				System.out.println(ev + " - " + dir);
 				if (maxx < ev) {
 					maxx = ev;
@@ -129,48 +114,67 @@ public class Blaster extends Ahero {
 	}
 
 	// what if give all to one guradian ?
-	private double evaluate(Point po) {
+	@Override
+	public double evaluate(Point target, Point from) {
 		int mcc = 0;
-		if (po != myp) {
-			mcc = moveCost;
-		}
 		double ev = 0;
 		double dd = 0;
-		ArrayList<Ahero> sameNuke = DangerNuke(po);
-		Point px = minDisFriend(po);
+		if (target != from) {
+			mcc = moveCost;
+		} else {
+			double maxx = -100000;// set max to no move TODO
+			boolean v = false, vt = false;
+			for (Direction1 dir : Direction1.values()) {
+				Point po = from.dir1To(dir);
+				if (po != null && !po.isWall && po.ifull)
+					v = true;
+				if (po.isWall)
+					vt = true;
+			}
+			if (!v) {
+				// maxx = evaluate(myp, myp);
+				maxx = 0;
+				if (vt && !from.isInObjectiveZone) {
+					maxx -= 0.05;
+				}
+				// not lock by wall
+				// System.out.println(maxx);
+			}
+			dd -= maxx;
+			if (w2)
+				dd -= 200000;
+		}
+		ArrayList<Ahero> sameNuke = DangerNuke(target);
+		Point px = minDisFriend(target);
 		// now it is bullshit just check 4 range
 
 		dd += (double) mcc / 100;// .04 .06 .08
 
 		if (seenO.size() == 0) {
-			dd += obdis[v(po)]; // 0 1 2 3 ...// chand nafar nazdik manan
+			dd += obdis[v(target)]; // 0 1 2 3 ...// chand nafar nazdik manan
 			if (sameNuke != null) {
 				// if(obdis[v(po)] == 0)
-				dd -= (double) po.distxy(px) * 0.15;// no dis
+				dd -= (double) target.distxy(px) * 0.15;// no dis
 				// dd += (double) sameNuke.size() * 0.3;
 			} else
 				dd -= 0.75;
 
-			dd += (double) ordis[v(po)] * 0.06;
+			dd += (double) ordis[v(target)] * 0.06;
+			if (beforeJumpTarget != null)
+				dd += dis[v(target)][v(beforeJumpTarget)];
 		} else {
-			dd += (double) obdis[v(po)] * 0.1;
+			dd += (double) obdis[v(target)] * 0.1;
 			if (mrealAP() < cost1 + mcc && can1) {
 				dd += 15;
 			}
 			// back line idea for not getting stalk at least one level stalk
-			Point pp = minDisEnemy(po);
-			int mde = dis[v(po)][v(pp)];
-			int mdexy = po.distxy(pp);
-			int cccop = disToGuardian(po);
-			int cedop = canEnemyDamageOnPoint(po);
-			int cedopx = canEnemyDamageOnPointXXX(po);
-			dd += mde + (double) cedop / 2 + (double) cedopx / 2;// 40 80 :|
-			if (cccop != maxInt && cccop <= 2)
-				dd -= 20 * cccop;
-			else if (cccop != maxInt && cccop > 2)
-				dd -= 40;
+			Point pp = minDisEnemy(target);
+			int mde = dis[v(target)][v(pp)];
+			int mdexy = target.distxy(pp);
+			double guardianDanger = enemyGuardianDanger(target);
+			dd += mde + guardianDanger;// 40 80 :|
 			if (sameNuke != null) {
-				dd -= (double) po.distxy(px) * 1.1;
+				dd -= (double) target.distxy(px) * 1.1;
 			} else
 				dd -= 5.5; // dd += sameNuke.size() * 2.0;
 		}
@@ -573,13 +577,13 @@ public class Blaster extends Ahero {
 	private void oneJump() {
 		double maxx = minInt;
 		Point bp = null;
-		maxx = evaluate(myp);
+		maxx = evaluate(myp, myp);
 		if (isReady2 && realAP() >= cost2) {
 			for (int dx = -4; dx <= +4; ++dx)
 				for (int dy = -(4 - Math.abs(dx)); dy <= 4 - Math.abs(dx); ++dy) {
 					if (isInMap(myp.x + dx, myp.y + dy) && !p[myp.x + dx][myp.y + dy].isWall
 							&& !p[myp.x + dx][myp.y + dy].ifull) {
-						double ev = evaluate(p[myp.x + dx][myp.y + dy]);
+						double ev = evaluate(p[myp.x + dx][myp.y + dy], myp);
 						if (ev > maxx) {
 							ev = maxx;
 							bp = p[myp.x + dx][myp.y + dy];

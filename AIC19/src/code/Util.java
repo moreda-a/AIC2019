@@ -9,6 +9,8 @@ import client.model.*;
 public class Util extends Constants {
 	// static class
 
+	static boolean sysOn = false;
+
 	public Integer maxInt = Integer.MAX_VALUE;
 	public Integer minInt = Integer.MIN_VALUE;
 
@@ -212,6 +214,34 @@ public class Util extends Constants {
 		if (!lastMyp.ifull)
 			System.err.println("WTF1");
 		lastMyp.ifull = false;
+		targetPoint.ifull = true;
+	}
+
+	public static void moveSimHero(Ahero hero, Point targetPoint) {
+		Point lastMyp = hero.myp;
+		// updateHeroAfterMove(hero);
+
+		// if move is ok!?!?!?! //TODO
+		if (targetPoint == null)
+			return;
+		// hero.moved = true;
+
+		hero.myp = targetPoint;
+		boolean v = true;
+		for (Ahero h : mlHeros.values()) {
+			if (hero == h)
+				continue;
+			if (h.myp == lastMyp)
+				v = false;
+		}
+
+		if (v) {
+			mfulls.remove(lastMyp);
+			lastMyp.ifull = false;
+		}
+		// age por bashe oke :
+
+		mfulls.add(targetPoint);
 		targetPoint.ifull = true;
 	}
 

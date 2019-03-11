@@ -5,11 +5,15 @@ import client.model.*;
 public class Action extends Util {
 	// like void castAbility(Hero, Ability, Cell);
 	Ahero ahero;
-	Hero mhero;
 	Ability ability;
 	Point targetPoint;
+	Boolean noAct = false;
 
-	Boolean isNothing = false;
+	Hero mhero;
+
+	public Action() {
+		noAct = true;
+	}
 
 	public Action(Ahero ahero, Ability bb, Point targetPoint) {
 		this.ahero = ahero;
@@ -18,11 +22,7 @@ public class Action extends Util {
 		this.targetPoint = targetPoint;
 	}
 
-	public Action() {
-		isNothing = true;
-	}
-
-	public void doAction() {
+	public void act() {
 		System.out.println(targetPoint + " " + targetPoint.ifull);
 		if (ability.getType() == AbilityType.DODGE) {
 			if (targetPoint.ifull) {

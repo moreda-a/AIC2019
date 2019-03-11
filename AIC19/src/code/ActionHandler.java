@@ -9,7 +9,6 @@ import client.model.*;
 public class ActionHandler extends Util {
 
 	public static ArrayList<ArrayList<Action>> actionLists;
-	public static ArrayList<Action> bestTurnAction = new ArrayList<Action>();
 
 	public static void doTurn() {
 		resAP = 0;// really ?
@@ -53,7 +52,7 @@ public class ActionHandler extends Util {
 					c = 0;
 			}
 		}
-		System.out.println("alpha : " + als + " - " + alpha + " - " + maxx);
+		System.out.println("Action : " + als + " - " + alpha + " - " + maxx);
 		if (bestTurnAction != null) {
 			doBestActions(bestTurnAction);
 		}
@@ -61,9 +60,9 @@ public class ActionHandler extends Util {
 
 	private static void doBestActions(ArrayList<Action> bestTurnAction) {
 		for (Action ac : bestTurnAction) {
-			if (ac.isNothing)
+			if (ac.noAct)
 				continue;
-			ac.doAction();
+			ac.act();
 		}
 
 	}
@@ -79,7 +78,7 @@ public class ActionHandler extends Util {
 		int hdamage = 0;
 		int noSameDamage = 0;
 		for (Action ac : turnAction) {
-			if (ac.isNothing)
+			if (ac.noAct)
 				continue;
 			app += ac.ability.getAPCost();
 			if (ac.ability.getType() == AbilityType.DODGE) {

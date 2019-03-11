@@ -223,7 +223,7 @@ public class Sentry extends Ahero {
 				vt = true;
 		}
 		if (!v) {
-			maxx = evaluate(myp);
+			maxx = evaluate(myp, myp);
 			if (vt && !myp.isInObjectiveZone) {
 				maxx -= 0.05;
 			}
@@ -242,7 +242,7 @@ public class Sentry extends Ahero {
 				// do we really need ifull ?
 				// can we calculate all together ?
 				// what about planning ?
-				double ev = evaluate(po);
+				double ev = evaluate(po, myp);
 				System.out.println(ev + " - " + dir);
 				if (maxx < ev) {
 					maxx = ev;
@@ -253,7 +253,8 @@ public class Sentry extends Ahero {
 		return bp;
 	}
 
-	private double evaluate(Point po) {
+	@Override
+	public double evaluate(Point target, Point from) {
 //		int mcc = 0;
 //		if (po != myp) {
 //			mcc = moveCost;

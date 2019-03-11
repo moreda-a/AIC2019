@@ -23,53 +23,14 @@ public class Healer extends Ahero {
 
 		if (phase == 0)
 			initMoveTurn();
+		startMoveTurn();
 
 		stateCheck();
 
-		Point bp = chooseBestMove();
-		tryToMoveTo(bp);
+		addBestMoves();
+		// Point bp = chooseBestMove();
+		// tryToMoveTo(bp);
 
-	}
-
-	private void initMoveTurn() {
-		jumpTarget = null;
-		w1 = false;
-		w2 = false;
-		w3 = false;
-		mresAP = 0;
-		// hello :D
-		Point bp = isItGoodToJump();
-		if (bp != null) {
-			w2 = true;
-			resAP += cost2;
-			mresAP += cost2;
-			jumpTarget = bp;
-		}
-	}
-
-	private Point isItGoodToJump() {
-		int minn = 100000;
-		Point bp = null;
-		if (isReady2 && realAP() >= cost2) {
-			for (int dx = -range2; dx <= +range2; ++dx)
-				for (int dy = -(range2 - Math.abs(dx)); dy <= range2 - Math.abs(dx); ++dy) {
-					if (isInMap(myp.x + dx, myp.y + dy) && !p[myp.x + dx][myp.y + dy].isWall
-							&& !p[myp.x + dx][myp.y + dy].ifull) {
-						if (obdis[v(myp.x + dx, myp.y + dy)] != -1 && obdis[v(myp.x + dx, myp.y + dy)] < minn) {
-							minn = obdis[v(myp.x + dx, myp.y + dy)];
-							bp = p[myp.x + dx][myp.y + dy];
-						}
-					}
-				}
-			if (minn < obdis[v(myp)] - mAP / moveCost) {
-				return bp;
-				// btarget = bp;
-				// w2 = true;
-				// resAP += cost2;
-				// mresAP += cost2;
-			}
-		}
-		return null;
 	}
 
 	private void stateCheck() {
@@ -119,25 +80,8 @@ public class Healer extends Ahero {
 
 	private Point chooseBestMove() {
 		Point bp = null;
-		double maxx = -100000;// set max to no move TODO
-		boolean v = false, vt = false;
-		for (Direction1 dir : Direction1.values()) {
-			Point po = myp.dir1To(dir);
-			if (po != null && !po.isWall && po.ifull)
-				v = true;
-			if (po.isWall)
-				vt = true;
-		}
-		if (!v) {
-			maxx = evaluate(myp);
-			if (vt && !myp.isInObjectiveZone) {
-				maxx -= 0.05;
-			}
-			// not lock by wall
-			System.out.println(maxx);
-		}
-		if (w2)
-			maxx += 200000;
+		double maxx = evaluate(myp, myp);// set max to no move TODO
+
 		// for no lock
 		// but can lock :( TODO
 		// problem with moving idiots!!!
@@ -148,7 +92,7 @@ public class Healer extends Ahero {
 				// do we really need ifull ?
 				// can we calculate all together ?
 				// what about planning ?
-				double ev = evaluate(po);
+				double ev = evaluate(po, myp);
 				System.out.println(ev + " - " + dir);
 				if (maxx < ev) {
 					maxx = ev;
@@ -159,39 +103,66 @@ public class Healer extends Ahero {
 		return bp;
 	}
 
-	private double evaluate(Point po) {
+	@Override
+	public double evaluate(Point target, Point from) {
 		int mcc = 0;
-		if (po != myp) {
-			mcc = moveCost;
-		}
 		double ev = 0;
 		double dd = 0;
-		ArrayList<Ahero> sameNuke = DangerNuke(po);
-		Point px = minDisFriend(po);
+		if (target != from) {
+			mcc = moveCost;
+		} else {
+			double maxx = -100000;// set max to no move TODO
+			boolean v = false, vt = false;
+			for (Direction1 dir : Direction1.values()) {
+				Point po = from.dir1To(dir);
+				if (po != null && !po.isWall && po.ifull)
+					v = true;
+				if (po.isWall)
+					vt = true;
+			}
+			if (!v) {
+				// maxx = evaluate(myp, myp);
+				maxx = 0;
+				if (vt && !from.isInObjectiveZone) {
+					maxx -= 0.05;
+				}
+				// not lock by wall
+				// System.out.println(maxx);
+			}
+			dd -= maxx;
+			if (w2)
+				dd -= 200000;
+		}
+		ArrayList<Ahero> sameNuke = DangerNuke(target);
+		Point px = minDisFriend(target);
 		// now it is bullshit just check 4 range
 
 		dd += (double) mcc / 100;// .04 .06 .08
 
 		if (seenO.size() == 0) {
-			dd += obdis[v(po)]; // 0 1 2 3 ...// chand nafar nazdik manan
+			dd += obdis[v(target)]; // 0 1 2 3 ...// chand nafar nazdik manan
 			if (sameNuke != null) {
 				// if(obdis[v(po)] == 0)
-				dd -= (double) po.distxy(px) * 0.15;// no dis
+				dd -= (double) target.distxy(px) * 0.15;// no dis
 				// dd += (double) sameNuke.size() * 0.3;
 			} else
 				dd -= 0.75;
 
-			dd += (double) ordis[v(po)] * 0.06;
+			dd += (double) ordis[v(target)] * 0.06;
+			if (beforeJumpTarget != null)
+				dd += dis[v(target)][v(beforeJumpTarget)];
 		} else {
-			dd += (double) obdis[v(po)] * 0.1;
+			dd += (double) obdis[v(target)] * 0.1;
 			if (mrealAP() < cost1 + mcc && can1) {
 				dd += 15;
 			}
 			// back line idea for not getting stalk at least one level stalk
-			Point pp = minDisEnemy(po);
-			int mde = dis[v(po)][v(pp)];
-			int mdexy = po.distxy(pp);
-			double guardianDanger = enemyGuardianDanger(po);
+			Point pp = minDisEnemy(target);
+			int mde = dis[v(target)][v(pp)];
+			// ?
+			mde = Math.max(1, mde);
+			int mdexy = target.distxy(pp);
+			double guardianDanger = enemyGuardianDanger(target);
 //			int cccop = disToGuardian(po);
 //			int cedop = canEnemyDamageOnPoint(po);
 //			int cedopx = canEnemyDamageOnPointXXX(po);
@@ -200,48 +171,112 @@ public class Healer extends Ahero {
 //				dd -= 20 * cccop;
 //			else if (cccop != maxInt && cccop > 2)
 //				dd -= 40;
+			if (phase == 5) {
+			}
 			if (sameNuke != null) {
-				dd -= (double) po.distxy(px) * 1.1;
+				dd -= (double) target.distxy(px) * 1.1 / sameNuke.size(); // and here shit :)
 			} else
-				dd -= 5.5; // dd += sameNuke.size() * 2.0;
-			if (po.distxy(px) > range3 && mdexy > range1)
-				dd += 50;
+				dd -= (double) 5 * 1.1; // dd += sameNuke.size() * 2.0;
+			dd += damageOfEnemiesThatCanShotMeAndMyAlies(target);// here shit
+			// maslan baese aghab garde alki mishe
+			dd -= Math.max(myTurnDamageFrom(target), myTurnHealFrom(target));
+			if (sysOn)
+				System.out.println(
+						"FUCK : " + myDamageFrom(target) + " - " + damageOfEnemiesThatCanShotMeAndMyAlies(target));
+//			if (po.distxy(px) > range3 && mdexy > range1)
+//				dd += 50;
 		}
 		// System.out.println(dd);
 		ev = 1000 - dd;
 		return ev;
 	}
 
-	private double enemyGuardianDanger(Point po) {
-		int minn = maxInt;
-		double val = 0;
-
-		// just Guardian
-		for (Ahero hero : seenOG) {
-			int fdis = po.distxy(hero.myp);
-			val += Math.max(4 - fdis, 0) * 20;
-			// minn = Math.min(minn, po.distxy(hero.myp));
-
+	// WRONG
+	private double numberOfEnemiesThatCanShotMeAndMyAlies(Point po) {
+		double num = 0;
+		for (Ahero hero : osHeros.values()) {
+			if (hero.type == HeroName.BLASTER) {
+				boolean v = false;
+				if (hero.myp.distxy(po) <= hero.range1 + hero.aoe1)// +1 ?
+				{
+					for (Ahero hhero : mlHeros.values())
+						if (hero.myp.distxy(hhero.myp) <= hero.range1 + hero.aoe1)
+							v = true;
+				}
+				if (hero.myp.distxy(po) <= hero.range3 + hero.aoe3)// +1 ?
+				{
+					for (Ahero hhero : mlHeros.values())
+						if (hero.myp.distxy(hhero.myp) <= hero.range3 + hero.aoe3)
+							v = true;
+				}
+				if (v)
+					++num;
+			}
+			if (hero.type == HeroName.GUARDIAN) {
+				boolean v = false;
+				if (hero.myp.distxy(po) <= hero.range1 + hero.aoe1)// +1 ?
+				{
+					for (Ahero hhero : mlHeros.values())
+						if (hero.myp.distxy(hhero.myp) <= hero.range1 + hero.aoe1)
+							v = true;
+				}
+				if (v)
+					++num;
+			}
 		}
-		// dis -> - 0 20 40 40 40 ...
-		// hajm damage i ke mikhore to onja hum :D
-		// farz kon yeki
-		// 40 40 40 20 0 0 0
-		// 40 20 0 -20 -40 -40 -40
-		// -> 80 60 40 20 0 0 0
-//		if (minn == maxInt)
-//			return 0;
-//		else if (minn == 0)
-//			return 100;// to much danger
-//		else if (minn == 1)
-//			return 100;
-//		else if (minn == 2)
-//			return 100;
-//		else if (minn == 3)
-//			return 100;
-//		else if (minn > 3)
-//			return 100;
-		return val;
+		return num;
+	}
+
+	private double damageOfEnemiesThatCanShotMeAndMyAlies(Point po) {
+		double damage = 0;
+		for (Ahero hero : osHeros.values()) {
+			if (hero.type == HeroName.BLASTER) {
+				boolean v = false;
+				if (hero.myp.distxy(po) <= hero.range1 + hero.aoe1)// +1 ?
+				{
+					for (Ahero hhero : mlHeros.values()) {
+						// nice Manhattan style :D
+						if (hhero == this)
+							continue;
+						if (hhero.myp.distxy(hero.myp) <= hero.range1 + hero.aoe1
+								&& hhero.myp.distxy(po) <= hero.aoe1 * 2)
+							v = true;
+					}
+				}
+				if (v)
+					damage += hero.pow1 / hero.maxcd1;
+				v = false;
+				if (hero.myp.distxy(po) <= hero.range3 + hero.aoe3)// +1 ?
+				{
+					for (Ahero hhero : mlHeros.values()) {
+						// nice Manhattan style :D
+						if (hhero == this)
+							continue;
+						if (hhero.myp.distxy(hero.myp) <= hero.range3 + hero.aoe3
+								&& hhero.myp.distxy(po) <= hero.aoe3 * 2)
+							v = true;
+					}
+				}
+				if (v)
+					damage += hero.pow3 / hero.maxcd3;
+			} else if (hero.type == HeroName.GUARDIAN) {
+				boolean v = false;
+				if (hero.myp.distxy(po) <= hero.range1 + hero.aoe1)// +1 ?
+				{
+					for (Ahero hhero : mlHeros.values()) {
+						// nice Manhattan style :D
+						if (hhero == this)
+							continue;
+						if (hhero.myp.distxy(hero.myp) <= hero.range1 + hero.aoe1
+								&& hhero.myp.distxy(po) <= hero.aoe1 * 2)
+							v = true;
+					}
+				}
+				if (v)
+					damage += hero.pow1 / hero.maxcd1;
+			}
+		}
+		return damage;
 	}
 
 	private ArrayList<Ahero> DangerNuke(Point po) {
@@ -333,13 +368,15 @@ public class Healer extends Ahero {
 	}
 
 	private void tryToMoveTo(Point bp) {
+
 		if (bp != null) {
 			if (moveCost <= realAP()) {
-				moveHero(this, bp);
-				usedAP += moveCost;
-				mresAP += moveCost;
+				movementList.add(new Movement(this, bp));
 			}
 		}
+
+		if (movementList.isEmpty())
+			movementList.add(new Movement(this, myp));
 	}
 
 	@Override
@@ -349,8 +386,9 @@ public class Healer extends Ahero {
 		if (jumpTarget != null && realAP() >= cost2) {
 			actionList.add(new Action(this, a2, jumpTarget));
 			jumpTarget = null;
-			return;
+			return;// force ?:/
 		}
+
 		actionList.add(new Action());
 
 		// mishe kamesh karda TODO
@@ -361,17 +399,36 @@ public class Healer extends Ahero {
 
 		if (rcd3 == 0 && cost3 <= realAP())
 			for (Ahero eh : mlHeros.values())
-				if (myp.distxy(eh.myp) <= range3 + aoe3)
+				if (myp.distxy(eh.myp) <= range3 + aoe3 && eh.mhp != eh.maxHP)
 					actionList.add(new Action(this, a3, eh.myp));
 
-//		if (mresAP == 0 && mAP >= cost2 && isReady2 && realAP() >= cost2 && actionList.size() == 0) {
-//			oneJump();
-//			if (jumpTarget != null)
-//				actionList.add(new Action(this, a2, jumpTarget));
-//			jumpTarget = null;
-//		} else
-//			actionList.add(new Action());
-		// }
+		if (actionList.size() == 0 && isReady2 && realAP() >= cost2 && mrealAP() >= cost2) {
+			oneJump();
+			if (jumpTarget != null)
+				actionList.add(new Action(this, a2, jumpTarget));
+			jumpTarget = null;
+		}
+
+	}
+
+	private void oneJump() {
+		double maxx = minInt;
+		Point bp = null;
+		maxx = evaluate(myp, myp);
+		if (isReady2 && realAP() >= cost2) {
+			for (int dx = -4; dx <= +4; ++dx)
+				for (int dy = -(4 - Math.abs(dx)); dy <= 4 - Math.abs(dx); ++dy) {
+					if (isInMap(myp.x + dx, myp.y + dy) && !p[myp.x + dx][myp.y + dy].isWall
+							&& !p[myp.x + dx][myp.y + dy].ifull) {
+						double ev = evaluate(p[myp.x + dx][myp.y + dy], myp);
+						if (ev > maxx) {
+							ev = maxx;
+							bp = p[myp.x + dx][myp.y + dy];
+						}
+					}
+				}
+		}
+		jumpTarget = bp;
 
 	}
 

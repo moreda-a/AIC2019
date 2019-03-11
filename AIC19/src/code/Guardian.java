@@ -120,14 +120,14 @@ public class Guardian extends Ahero {
 
 	private Point chooseBestMove() {
 		Point bp = null;
-		int maxx = -100000;// set max to no move
+		double maxx = -100000;// set max to no move
 		for (Direction1 dir : Direction1.values()) {
 			Point po = myp.dir1To(dir);
 			if (po != null && !po.isWall && !po.ifull) {
 				// do we really need ifull ?
 				// can we calculate all together ?
 				// what about planning ?
-				int ev = evaluate(po);
+				double ev = evaluate(po, myp);
 				// System.out.println(ev + " - " + dir);
 				if (maxx < ev) {
 					maxx = ev;
@@ -139,18 +139,19 @@ public class Guardian extends Ahero {
 	}
 
 //what if give all to one guradian ? 
-	private int evaluate(Point po) {
+	@Override
+	public double evaluate(Point target, Point from) {
 		int ev = 0;
 		int dd = 0;
 		if (seenO.size() != 0) {
-			Point pp = minDisEnemy(po);
-			dd = dis[v(po)][v(pp)];
+			Point pp = minDisEnemy(target);
+			dd = dis[v(target)][v(pp)];
 		} else {
-			if (!po.isInObjectiveZone) {
-				Stack<Point> path = Nav.bfsToObjective2(po);
+			if (!target.isInObjectiveZone) {
+				Stack<Point> path = Nav.bfsToObjective2(target);
 				if (path != null && path.size() != 0) {
 					Point pp = path.firstElement();
-					dd = dis[v(po)][v(pp)];
+					dd = dis[v(target)][v(pp)];
 				} else {
 					// not in objective zone but no path to objective zone. Probably blocked
 					// so don't go to this
