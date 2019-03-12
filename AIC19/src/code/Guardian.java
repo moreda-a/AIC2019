@@ -23,13 +23,8 @@ public class Guardian extends Ahero {
 
 	public int mresAP;
 
-	public Guardian(Hero h) {
-		super(h);
-//		waitingForRay = false;
-//		waitingForAttack = false;
-		// rayCost = h.getAbility(AbilityName.SENTRY_RAY).getAPCost();
-		// attackCost = h.getAbility(AbilityName.SENTRY_ATTACK).getAPCost();
-		// TODO Auto-generated constructor stub
+	public Guardian(Hero h, boolean myTeam) {
+		super(h, myTeam);
 	}
 
 	@Override

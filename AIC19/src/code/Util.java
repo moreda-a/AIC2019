@@ -11,8 +11,9 @@ public class Util extends Constants {
 
 	static boolean sysOn = false;
 
-	public Integer maxInt = Integer.MAX_VALUE;
-	public Integer minInt = Integer.MIN_VALUE;
+	public static Integer maxInt = Integer.MAX_VALUE;
+	public static Integer minInt = Integer.MIN_VALUE;
+	public static boolean enemyHasBlaster;
 
 	public static int[][] dis;
 	public static int[] obdis;
@@ -92,23 +93,24 @@ public class Util extends Constants {
 		if (turn == 4 && phase == 0) {
 			for (Hero h : world.getMyHeroes()) {
 				if (h.getName() == HeroName.BLASTER)
-					mHeros.put(h.getId(), new Blaster(h));
+					mHeros.put(h.getId(), new Blaster(h, true));
 				else if (h.getName() == HeroName.SENTRY)
-					mHeros.put(h.getId(), new Sentry(h));
+					mHeros.put(h.getId(), new Sentry(h, true));
 				else if (h.getName() == HeroName.HEALER)
-					mHeros.put(h.getId(), new Healer(h));
+					mHeros.put(h.getId(), new Healer(h, true));
 				else if (h.getName() == HeroName.GUARDIAN)
-					mHeros.put(h.getId(), new Guardian(h));
+					mHeros.put(h.getId(), new Guardian(h, true));
 			}
 			for (Hero h : world.getOppHeroes()) {
-				if (h.getName() == HeroName.BLASTER)
-					oHeros.put(h.getId(), new Blaster(h));
-				else if (h.getName() == HeroName.SENTRY)
-					oHeros.put(h.getId(), new Sentry(h));
+				if (h.getName() == HeroName.BLASTER) {
+					oHeros.put(h.getId(), new Blaster(h, false));
+					enemyHasBlaster = true;
+				} else if (h.getName() == HeroName.SENTRY)
+					oHeros.put(h.getId(), new Sentry(h, false));
 				else if (h.getName() == HeroName.HEALER)
-					oHeros.put(h.getId(), new Healer(h));
+					oHeros.put(h.getId(), new Healer(h, false));
 				else if (h.getName() == HeroName.GUARDIAN)
-					oHeros.put(h.getId(), new Guardian(h));
+					oHeros.put(h.getId(), new Guardian(h, false));
 			}
 		}
 

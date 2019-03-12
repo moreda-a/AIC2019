@@ -1,12 +1,14 @@
 package code;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Stack;
 
 import client.model.*;
 
 public abstract class Ahero extends Util {// ahero = hero
 	// TODO == double problem /double
+	public boolean myTeam;
 	public Hero mhero;
 	// private Cell mcell;
 	public boolean moved;
@@ -15,6 +17,7 @@ public abstract class Ahero extends Util {// ahero = hero
 	public boolean w2;
 	public boolean w3;
 	public boolean w22;
+	public boolean wl;
 
 	public Point jumpTarget = null;
 	public Point beforeJumpTarget = null;
@@ -83,8 +86,10 @@ public abstract class Ahero extends Util {// ahero = hero
 
 	public int mAP;
 	public int mresAP;
+	public Point swap;
 
-	public Ahero(Hero h) {
+	public Ahero(Hero h, boolean myTeam) {
+		this.myTeam = myTeam;
 		this.mhero = h;
 		Cell mcell = mhero.getCurrentCell();
 		myp = cellToPoint(mcell);
@@ -135,6 +140,32 @@ public abstract class Ahero extends Util {// ahero = hero
 		moved = false;
 		mhero = world.getHero(mid);
 		Cell mcell = mhero.getCurrentCell();
+
+		if ((mcell == null || mcell.getColumn() == -1) && (phase != 0 && isInVision)) {
+			// after move
+			Point px = null;
+			int k = 0;
+			if (!isInVision(myp)) {
+				px = myp;
+				++k;
+			}
+			for (Direction1 dir : Direction1.values()) {
+				Point po = myp.dir1To(dir);
+				if (po != null && !po.isWall && !isInVision(po)) {
+					px = po;
+					++k;
+				}
+			}
+			if (k == 1) {
+				System.out.println("we change :D");
+				mcell = pointToCell(px);
+			}
+
+		}
+
+		if (phase == 0 || mhp == -1 || mhp == 0)
+			mhp = mhero.getCurrentHP();
+		// else doesnot change ->-1 0
 		myp = cellToPoint(mcell);
 
 		a1 = mhero.getAbilities()[0];
@@ -145,11 +176,13 @@ public abstract class Ahero extends Util {// ahero = hero
 		rcd2 = a2.getRemCooldown();
 		rcd3 = a3.getRemCooldown();
 
+//		if (!myTeam)
+//			System.out.println("WG: " + rcd1 + " - " + rcd2 + " - " + rcd3);
+
 		isReady1 = a1.isReady();
 		isReady2 = a2.isReady();
 		isReady3 = a3.isReady();
 
-		mhp = mhero.getCurrentHP();
 		mrrt = mhero.getRemRespawnTime();
 		isDead = false;
 		if (mrrt != 0)
@@ -158,6 +191,7 @@ public abstract class Ahero extends Util {// ahero = hero
 		isInVision = true;
 		if (mcell == null || mcell.getColumn() == -1)
 			isInVision = false;
+
 	}
 
 	public abstract void update();
@@ -185,6 +219,17 @@ public abstract class Ahero extends Util {// ahero = hero
 		return heal;
 	}
 
+	protected double myHealFromO(Point po) {
+		double heal = 0;
+		if (type == HeroName.BLASTER) {
+		} else if (type == HeroName.SENTRY) {
+		} else if (type == HeroName.HEALER) {
+			heal = mostHealFrom(po, a3).se / maxcd3;
+		} else if (type == HeroName.GUARDIAN) {
+		}
+		return heal;
+	}
+
 	protected double myTurnHealFrom(Point po) {
 		double heal = 0;
 		if (type == HeroName.BLASTER) {
@@ -197,7 +242,38 @@ public abstract class Ahero extends Util {// ahero = hero
 		return heal;
 	}
 
+	protected double myTurnHealFromO(Point po) {
+		double heal = 0;
+		if (type == HeroName.BLASTER) {
+		} else if (type == HeroName.SENTRY) {
+		} else if (type == HeroName.HEALER) {
+			// if (isReady3)
+			// is ready ?
+			heal = mostHealFrom(po, a3).se;
+		} else if (type == HeroName.GUARDIAN) {
+		}
+		return heal;
+	}
+
 	protected double myDamageFrom(Point po) {
+		double damage = 0;
+		if (type == HeroName.BLASTER) {
+			double d1 = mostDamageFrom(po, a1).se;
+			double d3 = mostDamageFrom(po, a3).se;
+			damage = (double) (Math.max(d1, d3) + (maxcd3 - 1) * d1) / maxcd3;
+		} else if (type == HeroName.SENTRY) {
+			double d1 = mostDamageFrom(po, a1).se;
+			double d3 = mostDamageFrom(po, a3).se;
+			damage = (double) (Math.max(d1, d3) + (maxcd3 - 1) * d1) / maxcd3;
+		} else if (type == HeroName.HEALER) {
+			damage = mostDamageFrom(po, a1).se / maxcd1;
+		} else if (type == HeroName.GUARDIAN) {
+			damage = mostDamageFrom(po, a1).se / maxcd1;
+		}
+		return damage;
+	}
+
+	protected double myDamageFromO(Point po) {
 		double damage = 0;
 		if (type == HeroName.BLASTER) {
 			double d1 = mostDamageFrom(po, a1).se;
@@ -241,6 +317,32 @@ public abstract class Ahero extends Util {// ahero = hero
 		return damage;
 	}
 
+	protected double myTurnDamageFromO(Point po) {
+		double damage = 0;
+		if (type == HeroName.BLASTER) {
+			double d1 = 0, d3 = 0;
+			// if (isReady1)
+			d1 = mostDamageFrom(po, a1).se;
+			// if (isReady3)
+			d3 = mostDamageFrom(po, a3).se;
+			damage = Math.max(d1, d3);
+		} else if (type == HeroName.SENTRY) {
+			double d1 = 0, d3 = 0;
+			// if (isReady1)
+			d1 = mostDamageFrom(po, a1).se;
+			// if (isReady3)
+			d3 = mostDamageFrom(po, a3).se;
+			damage = Math.max(d1, d3);
+		} else if (type == HeroName.HEALER) {
+			// if (isReady1)
+			damage = mostDamageFrom(po, a1).se;
+		} else if (type == HeroName.GUARDIAN) {
+			// if (isReady1)
+			damage = mostDamageFrom(po, a1).se;
+		}
+		return damage;
+	}
+
 	// and him self
 	private Pair<Point, Double> mostHealFrom(Point po, Ability ab) {
 		int mx = 0;
@@ -248,7 +350,13 @@ public abstract class Ahero extends Util {// ahero = hero
 		// TODO not optimal
 		// TODO not right
 		// only right for bomb and guardian attack (lol what about unseen ? :D
-		for (Ahero hero : mlHeros.values()) {
+		HashMap<Integer, Ahero> teamHeros;
+		if (myTeam)
+			teamHeros = mlHeros;
+		else
+			teamHeros = osHeros;
+
+		for (Ahero hero : teamHeros.values())
 			if (hero.myp.distxy(po) <= ab.getRange() + ab.getAreaOfEffect()) {
 				int kx = Math.min(hero.maxHP - hero.mhp, ab.getPower());
 				if (kx > mx) {
@@ -256,7 +364,6 @@ public abstract class Ahero extends Util {// ahero = hero
 					be = hero.myp;
 				}
 			}
-		}
 		return new Pair<Point, Double>(be, (double) mx);
 	}
 
@@ -266,6 +373,7 @@ public abstract class Ahero extends Util {// ahero = hero
 		// TODO not optimal
 		// TODO not right
 		// only right for bomb and guardian attack (lol what about unseen ? :D
+
 		for (int dx = -ab.getRange(); dx <= ab.getRange(); ++dx) {
 			for (int dy = -(ab.getRange() - Math.abs(dx)); dy <= (ab.getRange() - Math.abs(dx)); ++dy) {
 				int xx = po.x + dx;
@@ -282,7 +390,7 @@ public abstract class Ahero extends Util {// ahero = hero
 						int yyy = yy + ty;
 						if (!isInMap(xxx, yyy))
 							continue;
-						if (p[xxx][yyy].ofull)
+						if (myTeam && p[xxx][yyy].ofull || !myTeam && p[xxx][yyy].ifull)
 							++k;
 					}
 				}
@@ -356,7 +464,6 @@ public abstract class Ahero extends Util {// ahero = hero
 			Point po = myp.dir1To(dir);
 			if (po != null && !po.isWall && !po.ifull)
 				movementList.add(new Movement(this, po));
-
 		}
 	}
 
@@ -418,5 +525,81 @@ public abstract class Ahero extends Util {// ahero = hero
 //		else if (minn > 3)
 //			return 100;
 		return val;
+	}
+
+	public static double damageOfEnemiesOn(Point target) {
+		double damage = 0;
+		for (Ahero hero : osHeros.values()) {
+			if (hero.type == HeroName.BLASTER) {
+				if (hero.myp.distxy(target) <= hero.range1 + hero.aoe1)// +1 ?
+					damage += hero.pow1 / hero.maxcd1;
+				if (hero.myp.distxy(target) <= hero.range3 + hero.aoe3)// +1 ?
+					damage += hero.pow3 / hero.maxcd3;
+			} else if (hero.type == HeroName.SENTRY) {
+				if (hero.myp.distxy(target) <= hero.range1 + hero.aoe1)// +1 ?
+					damage += hero.pow1 / hero.maxcd1;
+				if (hero.myp.distxy(target) <= hero.range3 + hero.aoe3)// +1 ?
+					damage += hero.pow3 / hero.maxcd3;
+			} else if (hero.type == HeroName.HEALER) {
+				if (hero.myp.distxy(target) <= hero.range1 + hero.aoe1)// +1 ?
+					damage += hero.pow1 / hero.maxcd1;
+			} else if (hero.type == HeroName.GUARDIAN) {
+				if (hero.myp.distxy(target) <= hero.range1 + hero.aoe1)// +1 ?
+					damage += hero.pow1 / hero.maxcd1;
+			}
+		}
+		return damage;
+	}
+
+	protected double damageOfEnemiesThatCanShotMeAndMyAlies(Point po) {
+		double damage = 0;
+		for (Ahero hero : osHeros.values()) {
+			if (hero.type == HeroName.BLASTER) {
+				boolean v = false;
+				if (hero.myp.distxy(po) <= hero.range1 + hero.aoe1)// +1 ?
+				{
+					for (Ahero hhero : mlHeros.values()) {
+						// nice Manhattan style :D
+						if (hhero == this)
+							continue;
+						if (hhero.myp.distxy(hero.myp) <= hero.range1 + hero.aoe1
+								&& hhero.myp.distxy(po) <= hero.aoe1 * 2)
+							v = true;
+					}
+				}
+				if (v)
+					damage += hero.pow1 / hero.maxcd1;
+				v = false;
+				if (hero.myp.distxy(po) <= hero.range3 + hero.aoe3)// +1 ?
+				{
+					for (Ahero hhero : mlHeros.values()) {
+						// nice Manhattan style :D
+						if (hhero == this)
+							continue;
+						if (hhero.myp.distxy(hero.myp) <= hero.range3 + hero.aoe3
+								&& hhero.myp.distxy(po) <= hero.aoe3 * 2)
+							v = true;
+					}
+				}
+				if (v)
+					damage += hero.pow3 / hero.maxcd3;
+			} else if (hero.type == HeroName.GUARDIAN) {
+				boolean v = false;
+				if (hero.myp.distxy(po) <= hero.range1 + hero.aoe1)// +1 ?
+				{
+					for (Ahero hhero : mlHeros.values()) {
+						// nice Manhattan style :D
+						if (hhero == this)
+							continue;
+						if (hhero.myp.distxy(hero.myp) <= hero.range1 + hero.aoe1
+								&& hhero.myp.distxy(po) <= hero.aoe1 * 2)
+							v = true;
+					}
+				}
+				if (v)
+					damage += hero.pow1 / hero.maxcd1;
+			}
+		}
+		return damage;
 	}
 }

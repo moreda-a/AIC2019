@@ -1,10 +1,9 @@
 package code;
 
 import java.util.ArrayList;
+import java.util.Stack;
 
-import client.model.AbilityName;
-import client.model.AbilityType;
-import client.model.Hero;
+import client.model.*;
 
 public class MovementHandler extends Util {
 
@@ -12,12 +11,11 @@ public class MovementHandler extends Util {
 	public static ArrayList<Movement> bestTurnMovement = new ArrayList<Movement>();
 
 	public static void doTurn() {
+
 		if (phase == 0) {
 			int k = 0;
 			int maxForRes = 0, minForRes = 0;
-			for (Ahero hero : mHeros.values()) {
-				if (hero.isDead)
-					continue;
+			for (Ahero hero : mlHeros.values()) {
 				k++;
 				if (hero.isReady3)
 					maxForRes += hero.cost3;
@@ -30,7 +28,30 @@ public class MovementHandler extends Util {
 					if (hero.isDead)
 						continue;
 					hero.mAP = maxAP / k;// or AP
+					hero.wl = false;
 				}
+
+			for (Ahero hero : mlHeros.values())
+				hero.swap = null;
+			for (Ahero hero : mlHeros.values()) {
+				if (hero.swap != null)
+					continue;
+				if (hero.mhp <= 35) {
+					for (Ahero h : mlHeros.values()) {
+						if (h == hero || h.swap != null)
+							continue;
+						// dis is better because we want to change places
+						if (dis[v(hero.myp)][v(h.myp)] <= 6 && h.mhp >= 150 && Ahero.damageOfEnemiesOn(h.myp) <= 15) {
+							h.swap = hero.myp;
+							hero.swap = h.myp;
+						}
+					}
+				}
+			}
+		}
+
+		if (turn == 5 && phase == 0) {
+			lockBackLine();
 		}
 
 		movementLists = new ArrayList<ArrayList<Movement>>();
@@ -80,6 +101,30 @@ public class MovementHandler extends Util {
 
 	}
 
+	private static void lockBackLine() {
+		int max1 = minInt;
+		int max2 = minInt;
+		Ahero m1 = null, m2 = null;
+		for (Ahero hero : mlHeros.values()) {
+			Stack<Point> sp = Nav.bfsToObjective2(hero.myp);
+			if (sp != null) {
+				int fp = sp.size();
+				if (fp > max1) {
+					max1 = fp;
+					m1 = hero;
+				} else if (fp > max2) {
+					max2 = fp;
+					m2 = hero;
+				}
+			}
+		}
+		if (m1 != null)
+			m1.wl = true;
+		if (m2 != null)
+			m2.wl = true;
+		System.out.println(max1 + " - " + max2);
+	}
+
 	private static double checkTurnMovement(ArrayList<Movement> turnMovement) {
 		// simple damage dealt
 		// sigma ev manteghiye ? (thinking ?) felan bezar
@@ -105,7 +150,16 @@ public class MovementHandler extends Util {
 			for (Movement mv : turnMovement) {
 				sev += mv.ahero.evaluate(mv.targetPoint, mv.lastPoint);
 			}
-
+			sev += ourDamage();
+			sev -= damageOfEnemiesThatCanShotMeAndMyAlies();
+			// if (phase == 5)
+			// sev -= enemyDamage();
+//			else
+//				sev -= damageOfEnemiesThatCanShotMeAndMyAlies();
+//			if (ourDamage() != 0)
+//				System.out.println("OD: " + ourDamage());
+//			if (enemyDamage() != 0)
+//				System.out.println("ED: " + enemyDamage());
 			for (int i = turnMovement.size() - 1; i >= 0; --i) {
 				Movement mv = turnMovement.get(i);
 				if (mv.noMove)
@@ -120,7 +174,34 @@ public class MovementHandler extends Util {
 		return 0;
 	}
 
+	private static double enemyDamage() {
+		// +heal
+		double damage = 0;
+		for (Ahero hero : osHeros.values()) {
+			// just for seen one
+			damage += Math.max(hero.myDamageFromO(hero.myp), hero.myHealFromO(hero.myp));
+			// turn ? ? ? ? TODO
+		}
+		return damage;
+	}
+
+	private static double ourDamage() {
+		// + heal
+		double damage = 0;
+		for (Ahero hero : mlHeros.values()) {
+			double dd = Math.max(hero.myTurnDamageFrom(hero.myp), hero.myTurnHealFrom(hero.myp));
+			damage += dd;
+//			if (dd != 0 && phase != 5)
+//				damage += 500;
+			// TODO
+			// heal is correct but damage is not correct actually hp ...
+			// was not correct before too
+		}
+		return damage;
+	}
+
 	private static void doBestMovements(ArrayList<Movement> bestTurnMovements) {
+		sscheckTurnMovement(bestTurnMovements);
 		for (Movement ac : bestTurnMovements) {
 			sysOn = true;
 			double ev = ac.ahero.evaluate(ac.lastPoint, ac.lastPoint);
@@ -138,5 +219,65 @@ public class MovementHandler extends Util {
 			sysOn = false;
 			ac.move();
 		}
+	}
+
+	private static double damageOfEnemiesThatCanShotMeAndMyAlies() {
+		double damage = 0;
+		for (Ahero hero : mlHeros.values()) {
+			damage += hero.damageOfEnemiesThatCanShotMeAndMyAlies(hero.myp);
+		}
+		return damage;
+	}
+
+	private static double sscheckTurnMovement(ArrayList<Movement> turnMovement) {
+		// simple damage dealt
+		// sigma ev manteghiye ? (thinking ?) felan bezar
+		int app = 0;
+		double sev = 0;
+		boolean v = true;
+		for (Movement mv : turnMovement) {
+			for (Movement mvv : turnMovement) {
+				if (mv == mvv)
+					continue;
+				if (mv.targetPoint == mvv.targetPoint)
+					v = false;
+			}
+		}
+		if (v) {
+			for (Movement mv : turnMovement) {
+				if (mv.noMove)
+					continue;
+				app += mv.ahero.moveCost;
+				mv.simAct();
+			}
+
+			for (Movement mv : turnMovement) {
+				sev += mv.ahero.evaluate(mv.targetPoint, mv.lastPoint);
+			}
+//			if (phase == 4 || phase == 5)
+//				sev += ourDamage();
+			System.out.println(ourDamage());
+			sev -= damageOfEnemiesThatCanShotMeAndMyAlies();
+			System.out.println(damageOfEnemiesThatCanShotMeAndMyAlies());
+			// if (phase == 5)
+			// sev -= enemyDamage();
+//			else
+//				sev -= damageOfEnemiesThatCanShotMeAndMyAlies();
+//			if (ourDamage() != 0)
+//				System.out.println("OD: " + ourDamage());
+//			if (enemyDamage() != 0)
+//				System.out.println("ED: " + enemyDamage());
+			for (int i = turnMovement.size() - 1; i >= 0; --i) {
+				Movement mv = turnMovement.get(i);
+				if (mv.noMove)
+					continue;
+				mv.reSimAct();
+			}
+
+			if (app <= AP) {
+				return sev;
+			}
+		}
+		return 0;
 	}
 }

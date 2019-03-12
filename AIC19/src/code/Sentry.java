@@ -18,14 +18,8 @@ public class Sentry extends Ahero {
 	public boolean canFight;
 	public Point btarget = null;
 
-	public Sentry(Hero h) {
-		super(h);
-		w1 = false;
-		w2 = false;
-		w3 = false;
-		// rayCost = h.getAbility(AbilityName.SENTRY_RAY).getAPCost();
-		// attackCost = h.getAbility(AbilityName.SENTRY_ATTACK).getAPCost();
-		// TODO Auto-generated constructor stub
+	public Sentry(Hero h, boolean myTeam) {
+		super(h, myTeam);
 	}
 
 	@Override

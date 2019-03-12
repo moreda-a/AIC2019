@@ -7,8 +7,8 @@ import client.model.*;
 
 public class Healer extends Ahero {
 
-	public Healer(Hero h) {
-		super(h);
+	public Healer(Hero h, boolean myTeam) {
+		super(h, myTeam);
 	}
 
 	@Override
@@ -162,24 +162,48 @@ public class Healer extends Ahero {
 			// ?
 			mde = Math.max(1, mde);
 			int mdexy = target.distxy(pp);
-			double guardianDanger = enemyGuardianDanger(target);
-//			int cccop = disToGuardian(po);
-//			int cedop = canEnemyDamageOnPoint(po);
-//			int cedopx = canEnemyDamageOnPointXXX(po);
-			dd += mde + guardianDanger;// 40 80 :|
-//			if (cccop != maxInt && cccop <= 2)
-//				dd -= 20 * cccop;
-//			else if (cccop != maxInt && cccop > 2)
-//				dd -= 40;
-			if (phase == 5) {
+
+			dd += mde + enemyGuardianDanger(target);// 80 60 40 20 0 0 0
+
+			if (mcc != 0 && wl) {
+//				if (sysOn)
+//					System.out.println("here");
+				if (seenOB.size() != 0) {
+//					if (sysOn)
+//						System.out.println("here");
+					for (Ahero hero : mlHeros.values()) {
+//						if (sysOn)
+//							System.out.println("here");
+						if (!hero.wl && from.distxy(hero.myp) <= 5)
+							dd += 1000;
+					}
+				}
 			}
+//			if (phase == 5) {
+//			}
+//			if (sysOn)
+//				System.out.println(dd);
+//			if (mcc != 0) {
+//				// dd -= (double) mcc / 100;// .04 .06 .08
+//				dd += (double) 1.1 * 3 / 4;
+//			}
+			double t = 1.1;
 			if (sameNuke != null) {
-				dd -= (double) target.distxy(px) * 1.1 / sameNuke.size(); // and here shit :)
+				dd -= (double) target.distxy(px) * t; // and here shit :)
+//				if (sysOn)
+//					System.out
+//							.println("f1 : " + ((double) target.distxy(px) * 1.1 / 4) + " - " + ((double) 1.1 * 3 / 4));
 			} else
-				dd -= (double) 5 * 1.1; // dd += sameNuke.size() * 2.0;
-			dd += damageOfEnemiesThatCanShotMeAndMyAlies(target);// here shit
+				dd -= (double) 5 * t; // dd += sameNuke.size() * 2.0;
+			// dd += damageOfEnemiesThatCanShotMeAndMyAlies(target);// here shit
 			// maslan baese aghab garde alki mishe
-			dd -= Math.max(myTurnDamageFrom(target), myTurnHealFrom(target));
+			// dd -= Math.max(myTurnDamageFrom(target), myTurnHealFrom(target));
+
+			if (sysOn)
+				System.out.println(dd);
+			if (swap != null)
+				dd += 30 * dis[v(target)][v(swap)];
+
 			if (sysOn)
 				System.out.println(
 						"FUCK : " + myDamageFrom(target) + " - " + damageOfEnemiesThatCanShotMeAndMyAlies(target));
@@ -225,58 +249,6 @@ public class Healer extends Ahero {
 			}
 		}
 		return num;
-	}
-
-	private double damageOfEnemiesThatCanShotMeAndMyAlies(Point po) {
-		double damage = 0;
-		for (Ahero hero : osHeros.values()) {
-			if (hero.type == HeroName.BLASTER) {
-				boolean v = false;
-				if (hero.myp.distxy(po) <= hero.range1 + hero.aoe1)// +1 ?
-				{
-					for (Ahero hhero : mlHeros.values()) {
-						// nice Manhattan style :D
-						if (hhero == this)
-							continue;
-						if (hhero.myp.distxy(hero.myp) <= hero.range1 + hero.aoe1
-								&& hhero.myp.distxy(po) <= hero.aoe1 * 2)
-							v = true;
-					}
-				}
-				if (v)
-					damage += hero.pow1 / hero.maxcd1;
-				v = false;
-				if (hero.myp.distxy(po) <= hero.range3 + hero.aoe3)// +1 ?
-				{
-					for (Ahero hhero : mlHeros.values()) {
-						// nice Manhattan style :D
-						if (hhero == this)
-							continue;
-						if (hhero.myp.distxy(hero.myp) <= hero.range3 + hero.aoe3
-								&& hhero.myp.distxy(po) <= hero.aoe3 * 2)
-							v = true;
-					}
-				}
-				if (v)
-					damage += hero.pow3 / hero.maxcd3;
-			} else if (hero.type == HeroName.GUARDIAN) {
-				boolean v = false;
-				if (hero.myp.distxy(po) <= hero.range1 + hero.aoe1)// +1 ?
-				{
-					for (Ahero hhero : mlHeros.values()) {
-						// nice Manhattan style :D
-						if (hhero == this)
-							continue;
-						if (hhero.myp.distxy(hero.myp) <= hero.range1 + hero.aoe1
-								&& hhero.myp.distxy(po) <= hero.aoe1 * 2)
-							v = true;
-					}
-				}
-				if (v)
-					damage += hero.pow1 / hero.maxcd1;
-			}
-		}
-		return damage;
 	}
 
 	private ArrayList<Ahero> DangerNuke(Point po) {
