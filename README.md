@@ -1,2 +1,4 @@
 # AIC2019
-Team DOS Sharif AI Challenge repository
+Team DOS, Sharif AI Challenge repository
+
+Postmortem soon
