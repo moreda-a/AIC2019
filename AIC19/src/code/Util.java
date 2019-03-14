@@ -28,9 +28,13 @@ public class Util extends Constants {
 	public static HashMap<Integer, Ahero> mHeros = new HashMap<Integer, Ahero>();
 	public static HashMap<Integer, Ahero> oHeros = new HashMap<Integer, Ahero>();
 	public static HashMap<Integer, Ahero> mlHeros = new HashMap<Integer, Ahero>();
+	public static HashMap<Integer, Ahero> mflHeros = new HashMap<Integer, Ahero>();
 	public static HashMap<Integer, Ahero> olHeros = new HashMap<Integer, Ahero>();
+	public static HashMap<Integer, Ahero> oflHeros = new HashMap<Integer, Ahero>();
 	public static HashMap<Integer, Ahero> msHeros = new HashMap<Integer, Ahero>();
+	public static HashMap<Integer, Ahero> mfsHeros = new HashMap<Integer, Ahero>();
 	public static HashMap<Integer, Ahero> osHeros = new HashMap<Integer, Ahero>();
+	public static HashMap<Integer, Ahero> ofsHeros = new HashMap<Integer, Ahero>();
 
 	public static ArrayList<Point> mfulls = new ArrayList<Point>();
 	public static ArrayList<Point> ofulls = new ArrayList<Point>();
@@ -92,25 +96,31 @@ public class Util extends Constants {
 
 		if (turn == 4 && phase == 0) {
 			for (Hero h : world.getMyHeroes()) {
-				if (h.getName() == HeroName.BLASTER)
+				if (h.getName() == HeroName.BLASTER) {
 					mHeros.put(h.getId(), new Blaster(h, true));
-				else if (h.getName() == HeroName.SENTRY)
+				} else if (h.getName() == HeroName.SENTRY) {
 					mHeros.put(h.getId(), new Sentry(h, true));
-				else if (h.getName() == HeroName.HEALER)
+				} else if (h.getName() == HeroName.HEALER) {
 					mHeros.put(h.getId(), new Healer(h, true));
-				else if (h.getName() == HeroName.GUARDIAN)
+				} else if (h.getName() == HeroName.GUARDIAN) {
 					mHeros.put(h.getId(), new Guardian(h, true));
+				} else if (h.getName() == HeroName.SHADOW) {
+					mHeros.put(h.getId(), new Shadow(h, true));
+				}
 			}
 			for (Hero h : world.getOppHeroes()) {
 				if (h.getName() == HeroName.BLASTER) {
 					oHeros.put(h.getId(), new Blaster(h, false));
 					enemyHasBlaster = true;
-				} else if (h.getName() == HeroName.SENTRY)
+				} else if (h.getName() == HeroName.SENTRY) {
 					oHeros.put(h.getId(), new Sentry(h, false));
-				else if (h.getName() == HeroName.HEALER)
+				} else if (h.getName() == HeroName.HEALER) {
 					oHeros.put(h.getId(), new Healer(h, false));
-				else if (h.getName() == HeroName.GUARDIAN)
+				} else if (h.getName() == HeroName.GUARDIAN) {
 					oHeros.put(h.getId(), new Guardian(h, false));
+				} else if (h.getName() == HeroName.SHADOW) {
+					oHeros.put(h.getId(), new Shadow(h, true));
+				}
 			}
 		}
 
@@ -125,19 +135,34 @@ public class Util extends Constants {
 			msHeros = new HashMap<Integer, Ahero>();
 			osHeros = new HashMap<Integer, Ahero>();
 
+			mflHeros = new HashMap<Integer, Ahero>();
+			oflHeros = new HashMap<Integer, Ahero>();
+			mfsHeros = new HashMap<Integer, Ahero>();
+			ofsHeros = new HashMap<Integer, Ahero>();
+
 			for (Ahero hero : mHeros.values()) {
 				if (!hero.isDead) {
 					mlHeros.put(hero.mid, hero);
-					if (hero.isInVision)
+					if (hero.type != HeroName.SHADOW)
+						mflHeros.put(hero.mid, hero);
+					if (hero.isInVision) {
 						msHeros.put(hero.mid, hero);
+						if (hero.type != HeroName.SHADOW)
+							mfsHeros.put(hero.mid, hero);
+					}
 				}
 			}
 
 			for (Ahero hero : oHeros.values()) {
 				if (!hero.isDead) {
 					olHeros.put(hero.mid, hero);
-					if (hero.isInVision)
+					if (hero.type != HeroName.SHADOW)
+						oflHeros.put(hero.mid, hero);
+					if (hero.isInVision) {
 						osHeros.put(hero.mid, hero);
+						if (hero.type != HeroName.SHADOW)
+							ofsHeros.put(hero.mid, hero);
+					}
 				}
 			}
 

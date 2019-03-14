@@ -8,7 +8,6 @@ import client.model.*;
 public class Blaster extends Ahero {
 	public boolean canRunAway;
 	public Point otarget;
-	public Point ntarget;
 	private String btfk;
 
 	public Blaster(Hero h, boolean myTeam) {
@@ -142,10 +141,10 @@ public class Blaster extends Ahero {
 			}
 			dd -= maxx;
 			if (w2)
-				dd -= 200000;
+				dd = -200000;
 		}
-		ArrayList<Ahero> sameNuke = DangerNuke(target);
-		Point px = minDisFriend(target);
+		ArrayList<Ahero> sameNuke = DangerNukeF(target);
+		Point px = minDisFriendF(target);
 		// now it is bullshit just check 4 range
 
 		dd += (double) mcc / 100;// .04 .06 .08
@@ -168,7 +167,7 @@ public class Blaster extends Ahero {
 				dd += 15;
 			}
 			// back line idea for not getting stalk at least one level stalk
-			Point pp = minDisEnemy(target);
+			Point pp = minDisEnemyF(target);
 			int mde = dis[v(target)][v(pp)];
 			int mdexy = target.distxy(pp);
 			double guardianDanger = enemyGuardianDanger(target);
@@ -180,7 +179,7 @@ public class Blaster extends Ahero {
 				if (seenOB.size() != 0) {
 //					if (sysOn)
 //						System.out.println("here");
-					for (Ahero hero : mlHeros.values()) {
+					for (Ahero hero : mflHeros.values()) {
 //						if (sysOn)
 //							System.out.println("here");
 						if (!hero.wl && from.distxy(hero.myp) <= 5)
@@ -279,39 +278,6 @@ public class Blaster extends Ahero {
 			minn = Math.min(minn, po.distxy(hero.myp));
 		}
 		return minn;
-	}
-
-	// return pathDis not realDis
-	private Point minDisEnemy(Point po) {
-		int minn = 100000;
-		Point bp = null;
-		for (Ahero hero : oHeros.values()) {
-			if (hero.isDead || !hero.isInVision)
-				continue;
-			if (dis[v(po)][v(hero.myp)] < minn) {
-				minn = dis[v(po)][v(hero.myp)];
-				bp = hero.myp;
-			}
-		}
-		return bp;
-	}
-
-	// return pathDis not realDis
-	private Point minDisFriend(Point po) {
-		int minn = 100000;
-		Point bp = null;
-
-		for (Ahero hero : mHeros.values()) {
-			if (hero == this)
-				continue;
-			if (hero.isDead)
-				continue;
-			if (dis[v(po)][v(hero.myp)] < minn) {
-				minn = dis[v(po)][v(hero.myp)];
-				bp = hero.myp;
-			}
-		}
-		return bp;
 	}
 
 	private Point moveForward() {
@@ -417,31 +383,6 @@ public class Blaster extends Ahero {
 		return bp;
 	}
 
-	private ArrayList<Ahero> DangerNuke(Point po) {
-		ArrayList<Ahero> dn = new ArrayList<Ahero>();
-		int ff = 1;
-		for (Ahero hero : osHeros.values()) {
-			if (hero.type == HeroName.BLASTER) {
-				// phase = 5
-				ff = 5;
-				if (po.distxy(hero.myp) <= 7 + (6 - phase))
-					ff = 5;
-			}
-		}
-		for (Ahero hero : mlHeros.values()) {
-			if (hero == this)
-				continue;
-			if (hero.myp.distxy(po) < ff) {
-				dn.add(hero);
-			}
-		}
-
-		if (dn.size() != 0)
-			return dn;
-		return null;
-
-	}
-
 	@SuppressWarnings("unused")
 	private int enemyDamageOnPoint(Point po) {
 		int damage = 0;
@@ -503,50 +444,6 @@ public class Blaster extends Ahero {
 				candamage = 30;
 		}
 		return candamage;
-	}
-
-	private void stateCheck() {
-		seenO = new ArrayList<Ahero>();
-		seenA1 = new ArrayList<Ahero>();
-		seenA3 = new ArrayList<Ahero>();
-		seenOB = new ArrayList<Ahero>();
-		seenOS = new ArrayList<Ahero>();
-		seenOH = new ArrayList<Ahero>();
-		seenOG = new ArrayList<Ahero>();
-		isInDanger = false;
-		can1 = false;
-		can3 = false;
-		for (Ahero hero : osHeros.values()) {
-			seenO.add(hero);
-			if (hero.type == HeroName.BLASTER)
-				seenOB.add(hero);
-			else if (hero.type == HeroName.SENTRY)
-				seenOS.add(hero);
-			else if (hero.type == HeroName.HEALER)
-				seenOH.add(hero);
-			else if (hero.type == HeroName.GUARDIAN)
-				seenOG.add(hero);
-
-			// if (isInVision(myp, hero.myp)) {
-			if (myp.distxy(hero.myp) <= range1 + aoe1) {
-				// TODO khati ...
-				seenA1.add(hero);
-			}
-			if (myp.distxy(hero.myp) <= range3 + aoe2) {
-				seenA3.add(hero);
-			}
-			// }
-			if (myp.distxy(hero.myp) <= 7)
-				isInDanger = true;
-		}
-
-		// isReady1 == true
-		if (seenA1.size() != 0 && isReady1 && (realAP() >= cost1))
-			can1 = true;
-		if (seenA3.size() != 0 && isReady3 && (realAP() >= cost3))
-			can3 = true;
-		// System.out.println(isReady3);
-
 	}
 
 	@Override
@@ -664,7 +561,7 @@ public class Blaster extends Ahero {
 				else
 					btfk = btfk + '0';
 			}
-			System.out.println(mx + " -x- " + btfk + " - " + be);
+			// System.out.println(mx + " -x- " + btfk + " - " + be);
 		}
 		return be;
 	}
@@ -717,38 +614,6 @@ public class Blaster extends Ahero {
 			}
 		}
 		return be;
-	}
-
-	@Override
-	public Point getNewDodge() {
-		if (seenO.size() == 0) {
-			if (!myp.isInObjectiveZone) {
-				mainPath = Nav.bfsToObjective2(myp);
-			}
-			ntarget = mainPath.firstElement();
-			int minn = 100000;
-			Point bp = null;
-			// System.out.println(ntarget);
-			for (int dx = -4; dx <= +4; ++dx)
-				for (int dy = -(4 - Math.abs(dx)); dy <= 4 - Math.abs(dx); ++dy) {
-					if (isInMap(myp.x + dx, myp.y + dy) && !p[myp.x + dx][myp.y + dy].isWall
-							&& !p[myp.x + dx][myp.y + dy].ifull) {
-						if (dis[v(myp.x + dx, myp.y + dy)][v(ntarget)] != -1
-								&& dis[v(myp.x + dx, myp.y + dy)][v(ntarget)] < minn) {
-							minn = dis[v(myp.x + dx, myp.y + dy)][v(ntarget)];
-							bp = p[myp.x + dx][myp.y + dy];
-						}
-					}
-				}
-
-			// System.out.println(minn + " - " + dis[v(myp)][v(ntarget)] + " - " + bp);
-			if (minn < dis[v(myp)][v(ntarget)] - 6) {
-				// btarget = bp;
-				return bp;
-			}
-
-		}
-		return null;
 	}
 
 }

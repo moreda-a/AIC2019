@@ -163,22 +163,8 @@ public class Guardian extends Ahero {
 		return ev;
 	}
 
-	// return pathDis not realDis
-	private Point minDisEnemy(Point po) {
-		int minn = 100000;
-		Point bp = null;
-		for (Ahero hero : oHeros.values()) {
-			if (hero.isDead || !hero.isInVision)
-				continue;
-			if (dis[v(po)][v(hero.myp)] < minn) {
-				minn = dis[v(po)][v(hero.myp)];
-				bp = hero.myp;
-			}
-		}
-		return bp;
-	}
-
-	private void stateCheck() {
+	@Override
+	protected void stateCheck() {
 		seenO = new ArrayList<Ahero>();
 		seenA1 = new ArrayList<Ahero>();
 		seenA3 = new ArrayList<Ahero>();

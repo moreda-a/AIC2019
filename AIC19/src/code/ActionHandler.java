@@ -77,11 +77,17 @@ public class ActionHandler extends Util {
 		int willDie = 0;
 		int hdamage = 0;
 		int noSameDamage = 0;
+		int fu = 0;
 		for (Action ac : turnAction) {
 			if (ac.noAct)
 				continue;
 			app += ac.ability.getAPCost();
-			if (ac.ability.getType() == AbilityType.DODGE) {
+			if (ac.ahero.type == HeroName.SHADOW && (ac.ability.getName() == AbilityName.SHADOW_SLASH
+					|| ac.ability.getName() == AbilityName.SHADOW_DODGE))
+				++fu;
+			if (ac.ability.getName() == AbilityName.SHADOW_SLASH) {
+				actionDamgePredict(ac);
+			} else if (ac.ability.getType() == AbilityType.DODGE) {
 				++dod;
 				continue;
 			} else if (ac.ability.getType() == AbilityType.DEFENSIVE) {
@@ -129,7 +135,7 @@ public class ActionHandler extends Util {
 		// Nearest enemies ??
 		// then less cd
 		// then more dodge
-
+		damage += fu * 100;
 		// same target in one turn ?
 		if (app <= AP) {
 			FastMath.startNewEvaluationFunction();// start New Evaluation Function
@@ -172,6 +178,8 @@ public class ActionHandler extends Util {
 			System.out.println("blaster attack BAD: " + hs + " - " + hs.length);
 		if (ac.ability.getName() == AbilityName.BLASTER_BOMB && hs.length == 0)
 			System.out.println("blaster bomb BAD: " + hs + " - " + hs.length);
+		if (ac.ability.getName() == AbilityName.SHADOW_SLASH && hs.length == 0)
+			System.out.println("shadow bomb BAD: " + hs + " - " + hs.length);
 
 		for (Hero hero : hs) {
 			Ahero ah = oHeros.get(hero.getId());

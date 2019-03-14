@@ -134,6 +134,8 @@ public abstract class Ahero extends Util {// ahero = hero
 		isDead = false;
 		if (mhero.getRemRespawnTime() != 0)
 			isDead = true;
+
+		System.out.println(type + " - " + myTeam);
 	}
 
 	public void updateHero() {
@@ -200,8 +202,6 @@ public abstract class Ahero extends Util {// ahero = hero
 
 	public abstract void actionTurn();
 
-	public abstract Point getNewDodge();
-
 	public abstract double evaluate(Point target, Point from);
 
 	public int mrealAP() {
@@ -215,6 +215,7 @@ public abstract class Ahero extends Util {// ahero = hero
 		} else if (type == HeroName.HEALER) {
 			heal = mostHealFrom(po, a3).se / maxcd3;
 		} else if (type == HeroName.GUARDIAN) {
+		} else if (type == HeroName.SHADOW) {
 		}
 		return heal;
 	}
@@ -226,6 +227,7 @@ public abstract class Ahero extends Util {// ahero = hero
 		} else if (type == HeroName.HEALER) {
 			heal = mostHealFrom(po, a3).se / maxcd3;
 		} else if (type == HeroName.GUARDIAN) {
+		} else if (type == HeroName.SHADOW) {
 		}
 		return heal;
 	}
@@ -238,6 +240,7 @@ public abstract class Ahero extends Util {// ahero = hero
 			if (isReady3)
 				heal = mostHealFrom(po, a3).se;
 		} else if (type == HeroName.GUARDIAN) {
+		} else if (type == HeroName.SHADOW) {
 		}
 		return heal;
 	}
@@ -251,6 +254,7 @@ public abstract class Ahero extends Util {// ahero = hero
 			// is ready ?
 			heal = mostHealFrom(po, a3).se;
 		} else if (type == HeroName.GUARDIAN) {
+		} else if (type == HeroName.SHADOW) {
 		}
 		return heal;
 	}
@@ -269,11 +273,14 @@ public abstract class Ahero extends Util {// ahero = hero
 			damage = mostDamageFrom(po, a1).se / maxcd1;
 		} else if (type == HeroName.GUARDIAN) {
 			damage = mostDamageFrom(po, a1).se / maxcd1;
+		} else if (type == HeroName.SHADOW) {
+			damage = mostDamageFrom(po, a1).se / maxcd1;
+			// wtf a3 ?? ?
 		}
 		return damage;
 	}
 
-	protected double myDamageFromO(Point po) {
+	protected double enemyDamageFrom(Point po) {
 		double damage = 0;
 		if (type == HeroName.BLASTER) {
 			double d1 = mostDamageFrom(po, a1).se;
@@ -287,6 +294,9 @@ public abstract class Ahero extends Util {// ahero = hero
 			damage = mostDamageFrom(po, a1).se / maxcd1;
 		} else if (type == HeroName.GUARDIAN) {
 			damage = mostDamageFrom(po, a1).se / maxcd1;
+		} else if (type == HeroName.SHADOW) {
+			damage = mostDamageFrom(po, a1).se / maxcd1;
+			// wtf a3 ?? ?
 		}
 		return damage;
 	}
@@ -313,11 +323,15 @@ public abstract class Ahero extends Util {// ahero = hero
 		} else if (type == HeroName.GUARDIAN) {
 			if (isReady1)
 				damage = mostDamageFrom(po, a1).se;
+		} else if (type == HeroName.SHADOW) {
+			if (isReady1)
+				damage = mostDamageFrom(po, a1).se;
+			// wtf a3 ?? ?
 		}
 		return damage;
 	}
 
-	protected double myTurnDamageFromO(Point po) {
+	protected double enemyTurnDamageFrom(Point po) {
 		double damage = 0;
 		if (type == HeroName.BLASTER) {
 			double d1 = 0, d3 = 0;
@@ -339,6 +353,10 @@ public abstract class Ahero extends Util {// ahero = hero
 		} else if (type == HeroName.GUARDIAN) {
 			// if (isReady1)
 			damage = mostDamageFrom(po, a1).se;
+		} else if (type == HeroName.SHADOW) {
+			// if (isReady1)
+			damage = mostDamageFrom(po, a1).se;
+			// wtf a3 ?? ?
 		}
 		return damage;
 	}
@@ -546,6 +564,9 @@ public abstract class Ahero extends Util {// ahero = hero
 			} else if (hero.type == HeroName.GUARDIAN) {
 				if (hero.myp.distxy(target) <= hero.range1 + hero.aoe1)// +1 ?
 					damage += hero.pow1 / hero.maxcd1;
+			} else if (hero.type == HeroName.SHADOW) {
+				if (hero.myp.distxy(target) <= hero.range1 + hero.aoe1)// +1 ?
+					damage += hero.pow1 / hero.maxcd1;
 			}
 		}
 		return damage;
@@ -558,7 +579,7 @@ public abstract class Ahero extends Util {// ahero = hero
 				boolean v = false;
 				if (hero.myp.distxy(po) <= hero.range1 + hero.aoe1)// +1 ?
 				{
-					for (Ahero hhero : mlHeros.values()) {
+					for (Ahero hhero : mflHeros.values()) {
 						// nice Manhattan style :D
 						if (hhero == this)
 							continue;
@@ -572,10 +593,12 @@ public abstract class Ahero extends Util {// ahero = hero
 				v = false;
 				if (hero.myp.distxy(po) <= hero.range3 + hero.aoe3)// +1 ?
 				{
-					for (Ahero hhero : mlHeros.values()) {
+					for (Ahero hhero : mflHeros.values()) {
 						// nice Manhattan style :D
 						if (hhero == this)
 							continue;
+//						if (turn > 10)
+//							System.out.println(hero.type + " - " + hhero.type + " - " + hero.myp + " - " + hhero.myp);
 						if (hhero.myp.distxy(hero.myp) <= hero.range3 + hero.aoe3
 								&& hhero.myp.distxy(po) <= hero.aoe3 * 2)
 							v = true;
@@ -587,7 +610,7 @@ public abstract class Ahero extends Util {// ahero = hero
 				boolean v = false;
 				if (hero.myp.distxy(po) <= hero.range1 + hero.aoe1)// +1 ?
 				{
-					for (Ahero hhero : mlHeros.values()) {
+					for (Ahero hhero : mflHeros.values()) {
 						// nice Manhattan style :D
 						if (hhero == this)
 							continue;
@@ -601,5 +624,223 @@ public abstract class Ahero extends Util {// ahero = hero
 			}
 		}
 		return damage;
+	}
+
+	protected void stateCheck() {
+		seenO = new ArrayList<Ahero>();
+		seenA1 = new ArrayList<Ahero>();
+		seenA3 = new ArrayList<Ahero>();
+		seenOB = new ArrayList<Ahero>();
+		seenOS = new ArrayList<Ahero>();
+		seenOH = new ArrayList<Ahero>();
+		seenOG = new ArrayList<Ahero>();
+		isInDanger = false;
+		can1 = false;
+		can3 = false;
+		for (Ahero hero : osHeros.values()) {
+			seenO.add(hero);
+			if (hero.type == HeroName.BLASTER)
+				seenOB.add(hero);
+			else if (hero.type == HeroName.SENTRY)
+				seenOS.add(hero);
+			else if (hero.type == HeroName.HEALER)
+				seenOH.add(hero);
+			else if (hero.type == HeroName.GUARDIAN)
+				seenOG.add(hero);
+
+			// if (isInVision(myp, hero.myp)) {
+			if (myp.distxy(hero.myp) <= range1 + aoe1) {
+				// TODO khati ...
+				seenA1.add(hero);
+			}
+			if (myp.distxy(hero.myp) <= range3 + aoe3) {
+				seenA3.add(hero);
+			}
+//			// }
+//			if (myp.distxy(hero.myp) <= 7)
+//				isInDanger = true;
+		}
+		if (damageOfEnemiesOn(myp) != 0)
+			isInDanger = true;
+		// isReady1 == true
+		if (seenA1.size() != 0 && isReady1 && (realAP() >= cost1))
+			can1 = true;
+		if (seenA3.size() != 0 && isReady3 && (realAP() >= cost3))
+			can3 = true;
+		// System.out.println(isReady3);
+	}
+
+	// return pathDis not realDis
+	protected Point minDisEnemy(Point po) {
+		int minn = 100000;
+		Point bp = null;
+		for (Ahero hero : oHeros.values()) {
+			if (hero.isDead || !hero.isInVision)
+				continue;
+			if (dis[v(po)][v(hero.myp)] < minn) {
+				minn = dis[v(po)][v(hero.myp)];
+				bp = hero.myp;
+			}
+		}
+		return bp;
+	}
+
+	protected Point minDisEnemyF(Point po) {
+		int minn = 100000;
+		Point bp = null;
+		for (Ahero hero : ofsHeros.values()) {
+			if (dis[v(po)][v(hero.myp)] < minn) {
+				minn = dis[v(po)][v(hero.myp)];
+				bp = hero.myp;
+			}
+		}
+		if (bp == null) {
+			for (Ahero hero : osHeros.values()) {
+				if (dis[v(po)][v(hero.myp)] < minn) {
+					minn = dis[v(po)][v(hero.myp)];
+					bp = hero.myp;
+				}
+			}
+		}
+		return bp;
+	}
+
+	// return pathDis not realDis
+	protected Point minDisFriend(Point po) {
+		int minn = 100000;
+		Point bp = null;
+
+		for (Ahero hero : mlHeros.values()) {
+			if (hero == this)
+				continue;
+			if (dis[v(po)][v(hero.myp)] < minn) {
+				minn = dis[v(po)][v(hero.myp)];
+				bp = hero.myp;
+			}
+		}
+		return bp;
+	}
+
+	protected Point minDisFriendF(Point po) {
+		int minn = 100000;
+		Point bp = null;
+
+		for (Ahero hero : mflHeros.values()) {
+			if (hero == this)
+				continue;
+			if (dis[v(po)][v(hero.myp)] < minn) {
+				minn = dis[v(po)][v(hero.myp)];
+				bp = hero.myp;
+			}
+		}
+		return bp;
+	}
+
+	protected ArrayList<Ahero> DangerNuke(Point po) {
+		ArrayList<Ahero> dn = new ArrayList<Ahero>();
+		int ff = 1;
+		for (Ahero hero : osHeros.values()) {
+			if (hero.type == HeroName.BLASTER) {
+				// phase = 5
+				ff = 5;
+				if (po.distxy(hero.myp) <= 7 + (6 - phase))
+					ff = 5;
+			}
+		}
+		for (Ahero hero : mlHeros.values()) {
+			if (hero == this)
+				continue;
+			if (hero.myp.distxy(po) < ff) {
+				dn.add(hero);
+			}
+		}
+
+		if (dn.size() != 0)
+			return dn;
+		return null;
+
+	}
+
+	protected ArrayList<Ahero> DangerNukeF(Point po) {
+		ArrayList<Ahero> dn = new ArrayList<Ahero>();
+		int ff = 1;
+		for (Ahero hero : osHeros.values()) {
+			if (hero.type == HeroName.BLASTER) {
+				// phase = 5
+				ff = 5;
+				if (po.distxy(hero.myp) <= 7 + (6 - phase))
+					ff = 5;
+			}
+		}
+		for (Ahero hero : mflHeros.values()) {
+			if (hero == this)
+				continue;
+			if (hero.myp.distxy(po) < ff) {
+				dn.add(hero);
+			}
+		}
+
+		if (dn.size() != 0)
+			return dn;
+		return null;
+
+	}
+
+	public Point getNewDodge() {
+		if (seenO.size() == 0) {
+			if (!myp.isInObjectiveZone) {
+				mainPath = Nav.bfsToObjective2(myp);
+			}
+			Point ntarget = mainPath.firstElement();
+			int minn = 100000;
+			Point bp = null;
+			// System.out.println(ntarget);
+			for (int dx = -4; dx <= +4; ++dx)
+				for (int dy = -(4 - Math.abs(dx)); dy <= 4 - Math.abs(dx); ++dy) {
+					if (isInMap(myp.x + dx, myp.y + dy) && !p[myp.x + dx][myp.y + dy].isWall
+							&& !p[myp.x + dx][myp.y + dy].ifull) {
+						if (dis[v(myp.x + dx, myp.y + dy)][v(ntarget)] != -1
+								&& dis[v(myp.x + dx, myp.y + dy)][v(ntarget)] < minn) {
+							minn = dis[v(myp.x + dx, myp.y + dy)][v(ntarget)];
+							bp = p[myp.x + dx][myp.y + dy];
+						}
+					}
+				}
+
+			// System.out.println(minn + " - " + dis[v(myp)][v(ntarget)] + " - " + bp);
+			if (minn < dis[v(myp)][v(ntarget)] - 6) {
+				// btarget = bp;
+				return bp;
+			}
+
+		}
+		return null;
+	}
+
+	protected Point linearShot(Point startPoint, Point targetPoint, Ability ab) {
+//		if (ab.getName() == AbilityName.SENTRY_ATTACK) {
+//
+//		} else if (ab.getName() == AbilityName.SENTRY_RAY) {
+//
+//		}
+		if (cellToPoint(world.getImpactCell(ab, pointToCell(startPoint), pointToCell(targetPoint))) == targetPoint)
+			return targetPoint;
+		else {
+			if (startPoint.x == targetPoint.x || startPoint.y == targetPoint.y)
+				return null;
+			for (int dx = 0; dx < 3; ++dx)
+				for (int dy = 0; dy < 3; ++dy) {
+					if (dx == 0 && dy == 0)
+						continue;
+					int xx = (int) Math.signum(targetPoint.x - startPoint.x) * dx + targetPoint.x;
+					int yy = (int) Math.signum(targetPoint.y - startPoint.y) * dy + targetPoint.y;
+					if (isInMap(xx, yy))
+						if (cellToPoint(world.getImpactCell(ab, pointToCell(startPoint),
+								pointToCell(p[xx][yy]))) == targetPoint)
+							return p[xx][yy];
+				}
+			//
+		}
+		return null;
 	}
 }

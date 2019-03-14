@@ -5,7 +5,8 @@ import client.model.*;
 public class PickHandler extends Util {
 
 	public static void doTurn() {
-		pickByStr("bbbb");
+		// pickByStr("wwww");
+		pickZstr();
 		// b4();
 		// b3g1();
 		// b2g2();
@@ -21,6 +22,31 @@ public class PickHandler extends Util {
 		// h4();
 	}
 
+	private static void pickZstr() {
+		if (turn == 0)
+			nextHero = HeroName.BLASTER;
+		else if (turn == 1)
+			nextHero = HeroName.BLASTER;
+		else if (turn == 2)
+			nextHero = HeroName.BLASTER;
+		else if (turn == 3) {
+			int bb = 0, ww = 0;
+			for (Hero h : world.getOppHeroes()) {
+				if (h.getName() == HeroName.BLASTER)
+					++bb;
+				else if (h.getName() == HeroName.SHADOW)
+					++ww;
+			}
+			if (bb != 3 || (bb == 2 && ww == 1))
+				nextHero = HeroName.BLASTER;
+			else
+				nextHero = HeroName.SHADOW;
+		}
+		addHero();
+
+	}
+
+	@SuppressWarnings("unused")
 	private static void pickByStr(String str) {
 		if (str.charAt(turn) == 'b')
 			nextHero = HeroName.BLASTER;
@@ -30,6 +56,8 @@ public class PickHandler extends Util {
 			nextHero = HeroName.HEALER;
 		else if (str.charAt(turn) == 'g')
 			nextHero = HeroName.GUARDIAN;
+		else if (str.charAt(turn) == 'w')
+			nextHero = HeroName.SHADOW;
 		addHero();
 	}
 

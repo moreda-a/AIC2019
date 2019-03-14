@@ -33,7 +33,8 @@ public class Healer extends Ahero {
 
 	}
 
-	private void stateCheck() {
+	@Override
+	protected void stateCheck() {
 		seenO = new ArrayList<Ahero>();
 		seenA1 = new ArrayList<Ahero>();
 		seenA3 = new ArrayList<Ahero>();
@@ -249,64 +250,6 @@ public class Healer extends Ahero {
 			}
 		}
 		return num;
-	}
-
-	private ArrayList<Ahero> DangerNuke(Point po) {
-		ArrayList<Ahero> dn = new ArrayList<Ahero>();
-		int ff = 1;
-		for (Ahero hero : osHeros.values()) {
-			if (hero.type == HeroName.BLASTER) {
-				// phase = 5
-				ff = 5;
-				if (po.distxy(hero.myp) <= 7 + (6 - phase))
-					ff = 5;
-			}
-		}
-		for (Ahero hero : mlHeros.values()) {
-			if (hero == this)
-				continue;
-			if (hero.myp.distxy(po) < ff) {
-				dn.add(hero);
-			}
-		}
-
-		if (dn.size() != 0)
-			return dn;
-		return null;
-
-	}
-
-	// return pathDis not realDis
-	private Point minDisFriend(Point po) {
-		int minn = 100000;
-		Point bp = null;
-
-		for (Ahero hero : mHeros.values()) {
-			if (hero == this)
-				continue;
-			if (hero.isDead)
-				continue;
-			if (dis[v(po)][v(hero.myp)] < minn) {
-				minn = dis[v(po)][v(hero.myp)];
-				bp = hero.myp;
-			}
-		}
-		return bp;
-	}
-
-	// return pathDis not realDis
-	private Point minDisEnemy(Point po) {
-		int minn = 100000;
-		Point bp = null;
-		for (Ahero hero : oHeros.values()) {
-			if (hero.isDead || !hero.isInVision)
-				continue;
-			if (dis[v(po)][v(hero.myp)] < minn) {
-				minn = dis[v(po)][v(hero.myp)];
-				bp = hero.myp;
-			}
-		}
-		return bp;
 	}
 
 	private int disToGuardian(Point po) {

@@ -105,7 +105,7 @@ public class MovementHandler extends Util {
 		int max1 = minInt;
 		int max2 = minInt;
 		Ahero m1 = null, m2 = null;
-		for (Ahero hero : mlHeros.values()) {
+		for (Ahero hero : mflHeros.values()) {
 			Stack<Point> sp = Nav.bfsToObjective2(hero.myp);
 			if (sp != null) {
 				int fp = sp.size();
@@ -150,7 +150,8 @@ public class MovementHandler extends Util {
 			for (Movement mv : turnMovement) {
 				sev += mv.ahero.evaluate(mv.targetPoint, mv.lastPoint);
 			}
-			sev += ourDamage();
+			// TODO TODO TODO XXX
+			// sev += ourDamage();
 			sev -= damageOfEnemiesThatCanShotMeAndMyAlies();
 			// if (phase == 5)
 			// sev -= enemyDamage();
@@ -179,7 +180,7 @@ public class MovementHandler extends Util {
 		double damage = 0;
 		for (Ahero hero : osHeros.values()) {
 			// just for seen one
-			damage += Math.max(hero.myDamageFromO(hero.myp), hero.myHealFromO(hero.myp));
+			damage += Math.max(hero.enemyDamageFrom(hero.myp), hero.myHealFromO(hero.myp));
 			// turn ? ? ? ? TODO
 		}
 		return damage;
@@ -223,7 +224,7 @@ public class MovementHandler extends Util {
 
 	private static double damageOfEnemiesThatCanShotMeAndMyAlies() {
 		double damage = 0;
-		for (Ahero hero : mlHeros.values()) {
+		for (Ahero hero : mflHeros.values()) { // no shadow
 			damage += hero.damageOfEnemiesThatCanShotMeAndMyAlies(hero.myp);
 		}
 		return damage;

@@ -24,7 +24,9 @@ public class Action extends Util {
 
 	public void act() {
 		System.out.println(targetPoint + " " + targetPoint.ifull);
-		if (ability.getType() == AbilityType.DODGE) {
+		if (ability.getName() == AbilityName.SHADOW_SLASH) {
+
+		} else if (ability.getType() == AbilityType.DODGE) {
 			if (targetPoint.ifull) {
 				targetPoint = ahero.getNewDodge();
 				if (targetPoint == null)

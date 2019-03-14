@@ -175,21 +175,6 @@ public class Sentry extends Ahero {
 		}
 	}
 
-	// return pathDis not realDis
-	private Point minDisEnemy(Point po) {
-		int minn = 100000;
-		Point bp = null;
-		for (Ahero hero : oHeros.values()) {
-			if (hero.isDead || !hero.isInVision)
-				continue;
-			if (dis[v(po)][v(hero.myp)] < minn) {
-				minn = dis[v(po)][v(hero.myp)];
-				bp = hero.myp;
-			}
-		}
-		return bp;
-	}
-
 	private Point tryToRunAwayX() {
 		int maxx = minInt;
 		Point bp = null;
@@ -361,7 +346,8 @@ public class Sentry extends Ahero {
 		return null;
 	}
 
-	private void stateCheck() {
+	@Override
+	protected void stateCheck() {
 		seenO = new ArrayList<Ahero>();
 		seenA1 = new ArrayList<Ahero>();
 		seenA3 = new ArrayList<Ahero>();
@@ -459,33 +445,6 @@ public class Sentry extends Ahero {
 //		if (v != null)
 //			usedAP += bb.getAPCost();
 
-	}
-
-	private Point linearShot(Point startPoint, Point targetPoint, Ability ab) {
-//		if (ab.getName() == AbilityName.SENTRY_ATTACK) {
-//
-//		} else if (ab.getName() == AbilityName.SENTRY_RAY) {
-//
-//		}
-		if (cellToPoint(world.getImpactCell(ab, pointToCell(startPoint), pointToCell(targetPoint))) == targetPoint)
-			return targetPoint;
-		else {
-			if (startPoint.x == targetPoint.x || startPoint.y == targetPoint.y)
-				return null;
-			for (int dx = 0; dx < 3; ++dx)
-				for (int dy = 0; dy < 3; ++dy) {
-					if (dx == 0 && dy == 0)
-						continue;
-					int xx = (int) Math.signum(targetPoint.x - startPoint.x) * dx + targetPoint.x;
-					int yy = (int) Math.signum(targetPoint.y - startPoint.y) * dy + targetPoint.y;
-					if (isInMap(xx, yy))
-						if (cellToPoint(world.getImpactCell(ab, pointToCell(startPoint),
-								pointToCell(p[xx][yy]))) == targetPoint)
-							return p[xx][yy];
-				}
-			//
-		}
-		return null;
 	}
 
 	@Override
