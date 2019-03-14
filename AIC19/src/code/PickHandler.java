@@ -5,8 +5,8 @@ import client.model.*;
 public class PickHandler extends Util {
 
 	public static void doTurn() {
-		// pickByStr("wwww");
-		pickZstr();
+		pickByStr("bbbb");
+		// pickZstr();
 		// b4();
 		// b3g1();
 		// b2g2();
